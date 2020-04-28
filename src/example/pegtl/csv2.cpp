@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <iostream>
@@ -23,7 +23,7 @@ namespace csv2
    // aha """,yes, this works
 
    // clang-format off
-   template< int C > struct string_without : pegtl::star< pegtl::not_one< C, 10, 13 > > {};
+   template< char C > struct string_without : pegtl::star< pegtl::not_one< C, 10, 13 > > {};
    struct plain_value : string_without< ',' > {};
    struct quoted_value : pegtl::if_must< pegtl::one< '"' >, string_without< '"' >, pegtl::one< '"' > > {};
    struct value : pegtl::sor< quoted_value, plain_value > {};
@@ -91,8 +91,8 @@ namespace csv2
    template<>
    struct action< plain_value >
    {
-      template< typename Input, unsigned N >
-      static void apply( const Input& in, result_data< N >& data )
+      template< typename ActionInput, unsigned N >
+      static void apply( const ActionInput& in, result_data< N >& data )
       {
          data.temp.push_back( in.string() );
       }
@@ -108,8 +108,8 @@ namespace csv2
    {
       using tuple_t = typename tuple_help< N, std::tuple<> >::tuple_t;
 
-      template< typename Input >
-      static void apply( const Input& in, result_data< N >& data )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, result_data< N >& data )
       {
          if( data.temp.size() != N ) {
             throw pegtl::parse_error( "column count mismatch", in );
@@ -168,7 +168,7 @@ namespace csv2
 
 }  // namespace csv2
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    for( int i = 1; i < argc; ++i ) {
       pegtl::file_input in( argv[ i ] );

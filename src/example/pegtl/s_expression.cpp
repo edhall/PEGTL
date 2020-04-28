@@ -1,12 +1,12 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <iostream>
 
 #include <tao/pegtl.hpp>
-#include <tao/pegtl/analyze.hpp>
+#include <tao/pegtl/contrib/analyze.hpp>
 
-using namespace TAO_PEGTL_NAMESPACE;  // NOLINT
+using namespace TAO_PEGTL_NAMESPACE;
 
 namespace sexpr
 {
@@ -44,8 +44,8 @@ namespace sexpr
    template<>
    struct action< plus< not_one< '"' > > >
    {
-      template< typename Input >
-      static void apply( const Input& in, std::string& fn )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, std::string& fn )
       {
          fn = in.string();
       }
@@ -54,8 +54,8 @@ namespace sexpr
    template<>
    struct action< hash_include >
    {
-      template< typename Input >
-      static void apply( const Input& in, std::string& fn )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, std::string& fn )
       {
          std::string f2;
          // Here f2 is the state argument for the nested parsing
@@ -71,7 +71,7 @@ namespace sexpr
 
 }  // namespace sexpr
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    if( analyze< sexpr::main >() != 0 ) {
       return 1;

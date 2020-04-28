@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_PARSE_ERROR_HPP
@@ -17,28 +17,19 @@
 namespace TAO_PEGTL_NAMESPACE
 {
    struct parse_error
-      : public std::runtime_error
+      : std::runtime_error
    {
       template< typename Msg >
-      parse_error( Msg&& msg, const std::vector< position >& in_positions )
-         : std::runtime_error( std::forward< Msg >( msg ) ),
-           positions( in_positions )
-      {
-      }
-
-      template< typename Msg >
-      parse_error( Msg&& msg, std::vector< position >&& in_positions )
+      parse_error( Msg&& msg, std::vector< position > in_positions )
          : std::runtime_error( std::forward< Msg >( msg ) ),
            positions( std::move( in_positions ) )
-      {
-      }
+      {}
 
       template< typename Msg >
       parse_error( Msg&& msg, const position& pos )
          : std::runtime_error( std::forward< Msg >( msg ) ),
            positions( 1, pos )
-      {
-      }
+      {}
 
       template< typename Msg >
       parse_error( Msg&& msg, position&& pos )
@@ -47,11 +38,10 @@ namespace TAO_PEGTL_NAMESPACE
          positions.emplace_back( std::move( pos ) );
       }
 
-      template< typename Msg, typename Input >
-      parse_error( Msg&& msg, const Input& in )
+      template< typename Msg, typename ParseInput >
+      parse_error( Msg&& msg, const ParseInput& in )
          : parse_error( std::forward< Msg >( msg ), in.position() )
-      {
-      }
+      {}
 
       std::vector< position > positions;
    };

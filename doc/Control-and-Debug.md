@@ -28,42 +28,44 @@ The `normal` control class template included with the PEGTL is used by default a
 template< typename Rule >
 struct normal
 {
-   template< typename Input,
-             typename... States >
-   static void start( const Input&, States&&... );
+   static constexpr bool enable;  // See Meta-Data-and-Visit.md
 
-   template< typename Input,
+   template< typename ParseInput,
              typename... States >
-   static void success( const Input&, States&&... );
+   static void start( const ParseInput&, States&&... );
 
-   template< typename Input,
+   template< typename ParseInput,
              typename... States >
-   static void failure( const Input&, States&&... );
+   static void success( const ParseInput&, States&&... );
 
-   template< typename Input,
+   template< typename ParseInput,
              typename... States >
-   static void raise( const Input& in, States&&... );
+   static void failure( const ParseInput&, States&&... );
+
+   template< typename ParseInput,
+             typename... States >
+   static void raise( const ParseInput& in, States&&... );
 
    template< template< typename... > class Action,
              typename Iterator,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   static auto apply( const Iterator& begin, const Input& in, States&&... st )
+   static auto apply( const Iterator& begin, const ParseInput& in, States&&... st )
       -> decltype( ... );
 
    template< template< typename... > class Action,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   static auto apply0( const Input&, States&&... st )
+   static auto apply0( const ParseInput&, States&&... st )
       -> decltype( ... );
 
    template< apply_mode A,
              rewind_mode M,
              template< typename... > class Action,
              template< typename... > class Control,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   static bool match( Input& in, States&&... st );
+   static bool match( ParseInput& in, States&&... st );
 };
 ```
 
@@ -140,4 +142,4 @@ Just like the action class template, a custom control class template can be used
 The latter requires the use of a [custom action](Actions-and-States.md).
 Deriving the specialisation of the custom action for `my_rule` from `tao::pegtl::change_control< my_control >` will switch the current control to `my_control` before attempting to match `my_rule`.
 
-Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cassert>
@@ -32,8 +32,7 @@ namespace examples
 
    template< typename Rule >
    struct action
-   {
-   };
+   {};
 
    template<>
    struct action< pegtl::json::null >
@@ -65,8 +64,8 @@ namespace examples
    template<>
    struct action< pegtl::json::number >
    {
-      template< typename Input >
-      static void apply( const Input& in, json_state& state )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, json_state& state )
       {
          std::stringstream ss( in.string() );
          long double v;
@@ -79,8 +78,8 @@ namespace examples
    struct action< pegtl::json::string::content >
       : json_unescape
    {
-      template< typename Input >
-      static void success( const Input& /*unused*/, std::string& s, json_state& state )
+      template< typename ParseInput >
+      static void success( const ParseInput& /*unused*/, std::string& s, json_state& state )
       {
          state.result = std::make_shared< string_json >( std::move( s ) );
       }
@@ -129,8 +128,8 @@ namespace examples
    struct action< pegtl::json::key::content >
       : json_unescape
    {
-      template< typename Input >
-      static void success( const Input& /*unused*/, std::string& s, json_state& state )
+      template< typename ParseInput >
+      static void success( const ParseInput& /*unused*/, std::string& s, json_state& state )
       {
          state.keys.push_back( std::move( s ) );
       }
@@ -160,7 +159,7 @@ namespace examples
 
 }  // namespace examples
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    if( argc != 2 ) {
       std::cerr << "usage: " << argv[ 0 ] << " <json>";
@@ -168,7 +167,7 @@ int main( int argc, char** argv )
    else {
       examples::json_state state;
       pegtl::file_input in( argv[ 1 ] );
-      pegtl::parse< examples::grammar, examples::action, examples::errors >( in, state );
+      pegtl::parse< examples::grammar, examples::action, examples::control >( in, state );
       assert( state.keys.empty() );
       assert( state.arrays.empty() );
       assert( state.objects.empty() );

@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_CONTRIB_ICU_UTF8_HPP
@@ -16,14 +16,12 @@ namespace TAO_PEGTL_NAMESPACE::utf8::icu
    template< UProperty P, bool V = true >
    struct binary_property
       : internal::icu::binary_property< internal::peek_utf8, P, V >
-   {
-   };
+   {};
 
    template< UProperty P, int V >
    struct property_value
       : internal::icu::property_value< internal::peek_utf8, P, V >
-   {
-   };
+   {};
 
    // clang-format off
    struct alphabetic : binary_property< UCHAR_ALPHABETIC > {};

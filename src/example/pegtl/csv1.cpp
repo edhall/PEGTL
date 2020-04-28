@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cassert>
@@ -50,8 +50,8 @@ namespace csv1
    template<>
    struct action< value >
    {
-      template< typename Input >
-      static void apply( const Input& in, result_data& data )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, result_data& data )
       {
          assert( !data.empty() );
          std::stringstream ss( in.string() );
@@ -64,21 +64,20 @@ namespace csv1
    template< typename Rule >
    struct control
       : pegtl::normal< Rule >
-   {
-   };
+   {};
 
    template<>
    struct control< value_line >
       : pegtl::normal< value_line >
    {
-      template< typename Input >
-      static void start( Input& /*unused*/, result_data& data )
+      template< typename ParseInput >
+      static void start( ParseInput& /*unused*/, result_data& data )
       {
          data.emplace_back();
       }
 
-      template< typename Input >
-      static void failure( Input& /*unused*/, result_data& data )
+      template< typename ParseInput >
+      static void failure( ParseInput& /*unused*/, result_data& data )
       {
          assert( !data.empty() );
          data.pop_back();
@@ -87,7 +86,7 @@ namespace csv1
 
 }  // namespace csv1
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    for( int i = 1; i < argc; ++i ) {
       pegtl::file_input in( argv[ i ] );

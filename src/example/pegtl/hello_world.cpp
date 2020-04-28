@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <iostream>
@@ -23,8 +23,8 @@ namespace hello
    template<>
    struct action< name >
    {
-      template< typename Input >
-      static void apply( const Input& in, std::string& v )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, std::string& v )
       {
          v = in.string();
       }
@@ -32,7 +32,7 @@ namespace hello
 
 }  // namespace hello
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    if( argc > 1 ) {
       std::string name;

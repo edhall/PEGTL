@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_CR_CRLF_EOL_HPP
@@ -13,8 +13,8 @@ namespace TAO_PEGTL_NAMESPACE::internal
    {
       static constexpr int ch = '\r';
 
-      template< typename Input >
-      [[nodiscard]] static eol_pair match( Input& in ) noexcept( noexcept( in.size( 2 ) ) )
+      template< typename ParseInput >
+      [[nodiscard]] static eol_pair match( ParseInput& in ) noexcept( noexcept( in.size( 2 ) ) )
       {
          eol_pair p = { false, in.size( 2 ) };
          if( p.second ) {

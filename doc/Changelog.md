@@ -5,23 +5,65 @@
 **Not yet released**
 
 * Use the [**migration guide**](Migration-Guide.md#version-300) when updating.
-* Updated required C++ standard to C++17.
-* Updated required [CMake](https://cmake.org/) version to 3.8.
-* The macro `TAO_PEGTL_NAMESPACE` now contains the fully qualified namespace, e.g. `tao::pegtl`.
-* Replaced `tao::pegtl::input_error` with `std::system_error`.
-* Changed message of `tao::pegtl::parse_error` to no longer contain the position redundantly.
-* Removed option of [state](Rule-Reference.md#state-s-r-)'s `S::success()` to have an extended signature to get access to the current `apply_mode`, `rewind_mode`, *action*- and *control* class (template).
-* Added `[[nodiscard]]` to most non-void functions.
-* Removed compatibility macros starting with `TAOCPP_PEGTL_`.
-* Removed compatibility uppercase enumerators.
-* Removed compatibility `peek_byte()` member functions.
-* Removed compatibility header `changes.hpp` from contrib.
+* Infrastructure
+  * Updated required C++ standard to C++17.
+  * Updated required [CMake](https://cmake.org/) version to 3.8.
+  * The macro `TAO_PEGTL_NAMESPACE` now contains the fully qualified namespace, e.g. `tao::pegtl`.
+  * Added `[[nodiscard]]` or `[[noreturn]]` to most non-void functions.
+* Meta-Data Layer
+  * Replaced `analysis_t` with more general and complete `rule_t` and `subs_t`.
+  * Added functions to visit all rules of a grammar.
+  * Added functions to measure rule coverage of a parsing run.
+  * Moved the analysis function and header to contrib.
+* Error Handling
+  * Replaced `tao::pegtl::input_error` with `std::system_error`.
+  * Changed message of `tao::pegtl::parse_error` to no longer contain the position redundantly.
+  * Added [`must_if<>`](Errors-and-Exceptions.md#custom-exception-messages)
+    * Allows to define custom error messages for global errors.
+    * Adds a non-intrusive way to define global parse errors for a grammar retroactively.
+* Demangling
+  * Removed the need for RTTI.
+    * Some broken/unknown compilers will use RTTI as a fallback, without demangling.
+  * Moved `tao::pegtl::internal::demangle<T>()` to `tao::demangle<T>()`.
+  * Improved generated code to be shorter and more efficient.
+* Parse Tree
+  * Removed the need for RTTI.
+* Other
+  * Moved rule `eolf` from inline namespace `tao::pegtl::ascii` to `tao::pegtl`.
+  * Changed rules in `tao/pegtl/contrib/integer.hpp` to not accept redundant leading zeros.
+  * Added rules to `tao/pegtl/contrib/integer.hpp` that test unsigned values against a maximum.
+  * Demoted UTF-16 and UTF-32 support to contrib.
+  * Demoted UINT-8, UINT-16, UINT-32 and UINT-64 support to contrib.
+  * Folded `contrib/counter.hpp` into `json_count.cpp`, count is superceded by coverage.
+* Cleanup
+  * Removed option of [state](Rule-Reference.md#state-s-r-)'s `S::success()` to have an extended signature to get access to the current `apply_mode`, `rewind_mode`, *action*- and *control* class (template).
+  * Removed compatibility macros starting with `TAOCPP_PEGTL_`.
+  * Removed compatibility uppercase enumerators.
+  * Removed compatibility `peek_byte()` member functions.
+  * Removed compatibility header `changes.hpp` from contrib.
+
+## 2.8.3
+
+Released 2020-04-22
+
+* Fixed excessive read-ahead with incremental inputs.
+* Added state manipulators `remove_first_state`, `remove_last_states`, `rotate_states_right`, `rotate_states_left`, and `reverse_states` to contrib.
+* Reduced the number of intermediate parse tree nodes.
+
+## 2.8.2
+
+Released 2020-04-05
+
+* Fixed parse tree node generation to correctly remove intermediate nodes.
 
 ## 2.8.1
 
-**Not yet released**
+Released 2019-08-06
 
+* Added fallback symbol demangling if RTTI is disabled.
 * Fixed missing `string_input<>` in amalgamated header.
+* Fixed `discard_input*` actions to properly forward the apply mode.
+* Fixed contrib HTTP grammar for chunked data.
 
 ## 2.8.0
 
@@ -552,4 +594,4 @@ Released 2008
 Development of the PEGTL started in November 2007 as an experiment in C++0x.
 It is based on ideas from the YARD library by Christopher Diggins.
 
-Copyright (c) 2007-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2007-2020 Dr. Colin Hirsch and Daniel Frey

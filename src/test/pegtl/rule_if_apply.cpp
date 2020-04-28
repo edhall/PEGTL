@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
@@ -10,8 +10,8 @@ namespace TAO_PEGTL_NAMESPACE
    {
       struct action_a
       {
-         template< typename Input >
-         static void apply( const Input& in, std::string& r, std::string& s )
+         template< typename ActionInput >
+         static void apply( const ActionInput& in, std::string& r, std::string& s )
          {
             TAO_PEGTL_TEST_ASSERT( r.empty() );
             TAO_PEGTL_TEST_ASSERT( s.empty() );
@@ -21,8 +21,8 @@ namespace TAO_PEGTL_NAMESPACE
 
       struct action_b
       {
-         template< typename Input >
-         static void apply( const Input& in, std::string& r, std::string& s )
+         template< typename ActionInput >
+         static void apply( const ActionInput& in, std::string& r, std::string& s )
          {
             TAO_PEGTL_TEST_ASSERT( s.empty() );
             s += in.string();
@@ -33,8 +33,8 @@ namespace TAO_PEGTL_NAMESPACE
 
       struct action2_a
       {
-         template< typename Input >
-         static void apply( const Input& in, bool& state_b )
+         template< typename ActionInput >
+         static void apply( const ActionInput& in, bool& state_b )
          {
             TAO_PEGTL_TEST_ASSERT( in.string_view() == "foo" );
             TAO_PEGTL_TEST_ASSERT( !state_b );
@@ -43,8 +43,8 @@ namespace TAO_PEGTL_NAMESPACE
 
       struct action2_b
       {
-         template< typename Input >
-         static bool apply( const Input& in, bool& state_b )
+         template< typename ActionInput >
+         static bool apply( const ActionInput& in, bool& state_b )
          {
             TAO_PEGTL_TEST_ASSERT( in.string_view() == "foo" );
             TAO_PEGTL_TEST_ASSERT( !state_b );
@@ -55,8 +55,8 @@ namespace TAO_PEGTL_NAMESPACE
 
       struct action2_c
       {
-         template< typename Input >
-         static void apply( const Input& /*unused*/, bool& /*unused*/ )
+         template< typename ActionInput >
+         static void apply( const ActionInput& /*unused*/, bool& /*unused*/ )
          {
             TAO_PEGTL_TEST_ASSERT( false );
          }
@@ -114,6 +114,8 @@ namespace TAO_PEGTL_NAMESPACE
          TAO_PEGTL_TEST_ASSERT( !result );
          TAO_PEGTL_TEST_ASSERT( !state_b );
       }
+      verify_meta< if_apply< any >, internal::if_apply< any >, any >();
+      verify_meta< if_apply< any, test1::action_a >, internal::if_apply< any, test1::action_a >, any >();
 
       verify_seqs< if_apply_seq >();
       verify_seqs< if_apply_disable >();

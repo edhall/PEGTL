@@ -1,7 +1,7 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
-#ifndef TAO_PEGTL_SRC_EXAMPLES_PEGTL_JSON_ERRORS_HPP  // NOLINT
+#ifndef TAO_PEGTL_SRC_EXAMPLES_PEGTL_JSON_ERRORS_HPP
 #define TAO_PEGTL_SRC_EXAMPLES_PEGTL_JSON_ERRORS_HPP
 
 #include <tao/pegtl.hpp>
@@ -12,52 +12,41 @@ namespace pegtl = TAO_PEGTL_NAMESPACE;
 namespace examples
 {
    // This file shows how to throw exceptions with
-   // custom error messages for parse errors. A custom
-   // control class is created that delegates everything
-   // to the PEGTL default control class TAO_PEGTL_NAMESPACE::normal<>
-   // except for the throwing of exceptions:
-
-   template< typename Rule >
-   struct errors
-      : public pegtl::normal< Rule >
-   {
-      static const std::string error_message;
-
-      template< typename Input, typename... States >
-      static void raise( const Input& in, States&&... /*unused*/ )
-      {
-         throw pegtl::parse_error( error_message, in );
-      }
-   };
-
-   // The following specialisations of the static string
-   // member are then used in the exception messages:
+   // custom error messages for parse errors.
+   // As the grammar contains must<>-rules,
+   // the compiler will complain when a
+   // specialization is missing.
 
    // clang-format off
-   template<> inline const std::string errors< pegtl::json::text >::error_message = "no valid JSON";  // NOLINT
+   template< typename > inline constexpr const char* error_message = nullptr;
 
-   template<> inline const std::string errors< pegtl::json::end_array >::error_message = "incomplete array, expected ']'";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::end_object >::error_message = "incomplete object, expected '}'";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::member >::error_message = "expected member";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::name_separator >::error_message = "expected ':'";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::array_element >::error_message = "expected value";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::value >::error_message = "expected value";  // NOLINT
+   template<> inline constexpr auto error_message< pegtl::json::text > = "no valid JSON";
 
-   template<> inline const std::string errors< pegtl::json::digits >::error_message = "expected at least one digit";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::xdigit >::error_message = "incomplete universal character name";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::escaped >::error_message = "unknown escape sequence";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::char_ >::error_message = "invalid character in string";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::string::content >::error_message = "unterminated string";  // NOLINT
-   template<> inline const std::string errors< pegtl::json::key::content >::error_message = "unterminated key";  // NOLINT
+   template<> inline constexpr auto error_message< pegtl::json::end_array > = "incomplete array, expected ']'";
+   template<> inline constexpr auto error_message< pegtl::json::end_object > = "incomplete object, expected '}'";
+   template<> inline constexpr auto error_message< pegtl::json::member > = "expected member";
+   template<> inline constexpr auto error_message< pegtl::json::name_separator > = "expected ':'";
+   template<> inline constexpr auto error_message< pegtl::json::array_element > = "expected value";
+   template<> inline constexpr auto error_message< pegtl::json::value > = "expected value";
 
-   template<> inline const std::string errors< pegtl::eof >::error_message = "unexpected character after JSON value";  // NOLINT
+   template<> inline constexpr auto error_message< pegtl::json::digits > = "expected at least one digit";
+   template<> inline constexpr auto error_message< pegtl::json::xdigit > = "incomplete universal character name";
+   template<> inline constexpr auto error_message< pegtl::json::escaped > = "unknown escape sequence";
+   template<> inline constexpr auto error_message< pegtl::json::char_ > = "invalid character in string";
+   template<> inline constexpr auto error_message< pegtl::json::string::content > = "unterminated string";
+   template<> inline constexpr auto error_message< pegtl::json::key::content > = "unterminated key";
+
+   template<> inline constexpr auto error_message< pegtl::eof > = "unexpected character after JSON value";
+
+   // As must_if can not take error_message as a template parameter directly, we need to wrap it.
+   // Additionally, we make sure only must<>-rules trigger global error.
+   struct error {
+      template< typename Rule > static constexpr auto raise_on_failure = false;
+      template< typename Rule > static constexpr auto message = error_message< Rule >;
+   };
+
+   template< typename Rule > using control = pegtl::must_if< error >::control< Rule >;
    // clang-format on
-
-   // The raise()-function-template is instantiated exactly
-   // for the specialisations of errors< Rule > for which a
-   // parse error can be generated, therefore the string
-   // error_message needs to be supplied only for these rules
-   // (and the compiler will complain if one is missing).
 
 }  // namespace examples
 

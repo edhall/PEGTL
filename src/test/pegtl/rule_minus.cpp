@@ -1,8 +1,8 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
-#include "verify_analyze.hpp"
+#include "verify_meta.hpp"
 #include "verify_rule.hpp"
 
 namespace TAO_PEGTL_NAMESPACE

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_ISTRING_HPP
@@ -9,11 +9,11 @@
 #include "../config.hpp"
 
 #include "bump_help.hpp"
+#include "enable_control.hpp"
 #include "result_on_found.hpp"
-#include "skip_control.hpp"
-#include "trivial.hpp"
+#include "success.hpp"
 
-#include "../analysis/counted.hpp"
+#include "../type_list.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
@@ -26,7 +26,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
       if constexpr( is_alpha< C > ) {
          return ( C | 0x20 ) == ( c | 0x20 );
       }
-      else {  // NOLINT
+      else {
          return c == C;
       }
    }
@@ -42,21 +42,21 @@ namespace TAO_PEGTL_NAMESPACE::internal
 
    template<>
    struct istring<>
-      : trivial< true >
-   {
-   };
+      : success
+   {};
 
    template< char... Cs >
    struct istring
    {
-      using analyze_t = analysis::counted< analysis::rule_type::any, sizeof...( Cs ) >;
+      using rule_t = istring;
+      using subs_t = empty_list;
 
-      template< typename Input >
-      [[nodiscard]] static bool match( Input& in ) noexcept( noexcept( in.size( 0 ) ) )
+      template< typename ParseInput >
+      [[nodiscard]] static bool match( ParseInput& in ) noexcept( noexcept( in.size( 0 ) ) )
       {
          if( in.size( sizeof...( Cs ) ) >= sizeof...( Cs ) ) {
             if( istring_equal< Cs... >( in.current() ) ) {
-               bump_help< result_on_found::success, Input, char, Cs... >( in, sizeof...( Cs ) );
+               bump_help< result_on_found::success, ParseInput, char, Cs... >( in, sizeof...( Cs ) );
                return true;
             }
          }
@@ -65,7 +65,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    };
 
    template< char... Cs >
-   inline constexpr bool skip_control< istring< Cs... > > = true;
+   inline constexpr bool enable_control< istring< Cs... > > = false;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

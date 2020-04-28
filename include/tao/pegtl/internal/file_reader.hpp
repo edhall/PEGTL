@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_FILE_READER_HPP
@@ -21,9 +21,9 @@ namespace TAO_PEGTL_NAMESPACE::internal
       std::FILE* file;
       if( ::fopen_s( &file, filename, "rb" ) == 0 )
 #elif defined( __MINGW32__ )
-      if( auto* file = std::fopen( filename, "rb" ) )  // NOLINT(cppcoreguidelines-owning-memory)
+      if( auto* file = std::fopen( filename, "rb" ) )
 #else
-      if( auto* file = std::fopen( filename, "rbe" ) )  // NOLINT(cppcoreguidelines-owning-memory)
+      if( auto* file = std::fopen( filename, "rbe" ) )
 #endif
       {
          return file;
@@ -36,7 +36,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    {
       void operator()( FILE* f ) const noexcept
       {
-         std::fclose( f );  // NOLINT(cppcoreguidelines-owning-memory)
+         std::fclose( f );
       }
    };
 
@@ -46,14 +46,12 @@ namespace TAO_PEGTL_NAMESPACE::internal
       explicit file_reader( const char* filename )
          : m_source( filename ),
            m_file( file_open( m_source ) )
-      {
-      }
+      {}
 
       file_reader( FILE* file, const char* filename ) noexcept
          : m_source( filename ),
            m_file( file )
-      {
-      }
+      {}
 
       file_reader( const file_reader& ) = delete;
       file_reader( file_reader&& ) = delete;

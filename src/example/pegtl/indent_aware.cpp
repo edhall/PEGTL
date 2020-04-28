@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cassert>
@@ -132,12 +132,12 @@ namespace example
    template<>
    struct action< else_line >
    {
-      template< typename Input >
-      static void apply( const Input& in, state& s )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, state& s )
       {
          assert( !s.stack.empty() );
          if( ( s.stack.back().type != type::if_ ) || ( s.stack.back().indent != s.current_indent ) ) {
-            throw pegtl::parse_error( "expected previous 'if' on same indent as current 'else'", in );  // NOLINT
+            throw pegtl::parse_error( "expected previous 'if' on same indent as current 'else'", in );
          }
          s.stack.back().type = type::else_;
       }
@@ -155,11 +155,11 @@ namespace example
    template<>
    struct action< nothing >
    {
-      template< typename Input >
-      static void apply( const Input& in, state& s )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, state& s )
       {
          if( s.minimum_indent > 0 ) {
-            throw pegtl::parse_error( "expected indented block instead of empty line", in );  // NOLINT
+            throw pegtl::parse_error( "expected indented block instead of empty line", in );
          }
          s.stack.clear();
       }
@@ -168,8 +168,8 @@ namespace example
    template<>
    struct action< indent >
    {
-      template< typename Input >
-      static void apply( const Input& in, state& s )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, state& s )
       {
          s.current_indent = in.size();
          if( s.current_indent != 0 ) {
@@ -179,12 +179,12 @@ namespace example
          }
          if( s.minimum_indent > 0 ) {
             if( s.current_indent < s.minimum_indent ) {
-               throw pegtl::parse_error( "expected indented block with more indent", in );  // NOLINT
+               throw pegtl::parse_error( "expected indented block with more indent", in );
             }
             s.minimum_indent = 0;
          }
          else if( ( !s.stack.empty() ) && ( s.current_indent != s.stack.back().indent ) ) {
-            throw pegtl::parse_error( "indentation mismatch", in );  // NOLINT
+            throw pegtl::parse_error( "indentation mismatch", in );
          }
       }
    };
@@ -192,18 +192,18 @@ namespace example
    template<>
    struct action< grammar >
    {
-      template< typename Input >
-      static void apply( const Input& in, state& s )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, state& s )
       {
          if( s.minimum_indent > 0 ) {
-            throw pegtl::parse_error( "expected indented block instead of eof", in );  // NOLINT
+            throw pegtl::parse_error( "expected indented block instead of eof", in );
          }
       }
    };
 
 }  // namespace example
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    for( int i = 1; i < argc; ++i ) {
       pegtl::file_input in( argv[ i ] );

@@ -1,9 +1,9 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
 
-#include <tao/pegtl/contrib/tracer.hpp>
+#include <tao/pegtl/contrib/trace.hpp>
 
 namespace TAO_PEGTL_NAMESPACE
 {
@@ -11,14 +11,14 @@ namespace TAO_PEGTL_NAMESPACE
    using GRAMMAR2 = seq< one< 'a' >, any, any, any, any, one< 'b' >, eof >;
 
    template< typename Rule >
-   struct tracer_action
+   struct trace_action
    {};
 
    unsigned a0 = 0;
    unsigned a = 0;
 
    template<>
-   struct tracer_action< one< 'a' > >
+   struct trace_action< one< 'a' > >
    {
       template< typename... Ts >
       static void apply0( Ts&&... /*unused*/ )
@@ -28,7 +28,7 @@ namespace TAO_PEGTL_NAMESPACE
    };
 
    template<>
-   struct tracer_action< GRAMMAR >
+   struct trace_action< GRAMMAR >
    {
       template< typename... Ts >
       static void apply( Ts&&... /*unused*/ )
@@ -41,47 +41,35 @@ namespace TAO_PEGTL_NAMESPACE
    {
       {
          memory_input in( "ab", "trace test please ignore" );
-         const auto result = parse< GRAMMAR, nothing, tracer >( in );
+         standard_tracer tr( in );
+         const auto result = tr.parse< GRAMMAR >( in );
          TAO_PEGTL_TEST_ASSERT( result );
          TAO_PEGTL_TEST_ASSERT( a0 == 0 );
          TAO_PEGTL_TEST_ASSERT( a == 0 );
       }
       {
          memory_input in( "ab", "trace test please ignore" );
-         const auto result = parse< GRAMMAR, tracer_action, tracer >( in );
+         standard_tracer tr( in );
+         const auto result = tr.parse< GRAMMAR, trace_action >( in );
          TAO_PEGTL_TEST_ASSERT( result );
          TAO_PEGTL_TEST_ASSERT( a0 == 1 );
          TAO_PEGTL_TEST_ASSERT( a == 1 );
       }
       {
-         trace_state ts;
-         memory_input in( "ab", "trace test please ignore" );
-         const auto result = parse< GRAMMAR, nothing, tracer >( in, ts );
+         memory_input in( "a\r\n\t\0b", 6, "trace test please ignore" );
+         standard_tracer tr( in );
+         const auto result = tr.parse< GRAMMAR2 >( in );
          TAO_PEGTL_TEST_ASSERT( result );
          TAO_PEGTL_TEST_ASSERT( a0 == 1 );
          TAO_PEGTL_TEST_ASSERT( a == 1 );
       }
       {
-         trace_state ts;
-         memory_input in( "ab", "trace test please ignore" );
-         const auto result = parse< GRAMMAR, tracer_action, tracer >( in, ts );
+         memory_input in( "a\r\n\t\0b", 6, "trace test please ignore" );
+         standard_tracer tr( in );
+         const auto result = tr.parse< GRAMMAR2, trace_action >( in );
          TAO_PEGTL_TEST_ASSERT( result );
          TAO_PEGTL_TEST_ASSERT( a0 == 2 );
-         TAO_PEGTL_TEST_ASSERT( a == 2 );
-      }
-      {
-         trace_state ts;
-         memory_input in( "a\r\n\t\0b", 6, "trace test please ignore" );
-         const auto result = parse< GRAMMAR2, nothing, tracer >( in, ts );
-         TAO_PEGTL_TEST_ASSERT( result );
-         TAO_PEGTL_TEST_ASSERT( a0 == 2 );
-         TAO_PEGTL_TEST_ASSERT( a == 2 );
-      }
-      {
-         trace_state ts;
-         memory_input in( "a\r\n\t\0b", 6, "trace test please ignore" );
-         const auto result = parse< GRAMMAR2, tracer_action, tracer >( in, ts );
-         TAO_PEGTL_TEST_ASSERT( result );
+         TAO_PEGTL_TEST_ASSERT( a == 1 );
       }
    }
 

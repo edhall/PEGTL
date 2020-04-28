@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_ISTREAM_INPUT_HPP
@@ -19,14 +19,13 @@ namespace TAO_PEGTL_NAMESPACE
       : buffer_input< internal::istream_reader, Eol, std::string, Chunk >
    {
       template< typename T >
-      istream_input( std::istream& in_stream, const std::size_t in_maximum, T&& in_source )  // NOLINT
+      istream_input( std::istream& in_stream, const std::size_t in_maximum, T&& in_source )
          : buffer_input< internal::istream_reader, Eol, std::string, Chunk >( std::forward< T >( in_source ), in_maximum, in_stream )
-      {
-      }
+      {}
    };
 
    template< typename... Ts >
-   istream_input( Ts&&... )->istream_input<>;
+   istream_input( Ts&&... ) -> istream_input<>;
 
 }  // namespace TAO_PEGTL_NAMESPACE
 

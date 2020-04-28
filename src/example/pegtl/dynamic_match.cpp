@@ -1,12 +1,15 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
+#include <cassert>
 #include <cstring>
 
 #include <iostream>
 #include <string>
 
 #include <tao/pegtl.hpp>
+
+#include <tao/pegtl/contrib/analyze.hpp>
 
 namespace pegtl = TAO_PEGTL_NAMESPACE;
 
@@ -22,15 +25,17 @@ namespace dynamic
 
    struct long_literal_mark
    {
+      using rule_t = long_literal_mark;
+
       template< pegtl::apply_mode,
                 pegtl::rewind_mode,
                 template< typename... >
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      static bool match( Input& in, const std::string& id, const std::string& /*unused*/, States&&... /*unused*/ )
+      static bool match( ParseInput& in, const std::string& id, const std::string& /*unused*/, States&&... /*unused*/ )
       {
          if( in.size( id.size() ) >= id.size() ) {
             if( std::memcmp( in.current(), id.data(), id.size() ) == 0 ) {
@@ -61,8 +66,8 @@ namespace dynamic
    template<>
    struct action< long_literal_id >
    {
-      template< typename Input >
-      static void apply( const Input& in, std::string& id, const std::string& /*unused*/ )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, std::string& id, const std::string& /*unused*/ )
       {
          id = in.string();
       }
@@ -71,8 +76,8 @@ namespace dynamic
    template<>
    struct action< long_literal_body >
    {
-      template< typename Input >
-      static void apply( const Input& in, const std::string& /*unused*/, std::string& body )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, const std::string& /*unused*/, std::string& body )
       {
          body += in.string();
       }
@@ -80,8 +85,20 @@ namespace dynamic
 
 }  // namespace dynamic
 
-int main( int argc, char** argv )
+namespace TAO_PEGTL_NAMESPACE
 {
+   template< typename Name >
+   struct analyze_traits< Name, dynamic::long_literal_mark >
+      : analyze_any_traits<>
+   {};
+
+}  // namespace TAO_PEGTL_NAMESPACE
+
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
+{
+   const auto issues = pegtl::analyze< dynamic::grammar >();
+   assert( !issues );
+
    if( argc > 1 ) {
       std::string id;
       std::string body;

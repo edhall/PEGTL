@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2015-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <tao/pegtl/file_input.hpp>
@@ -30,7 +30,7 @@ namespace TAO_PEGTL_NAMESPACE
 
 #else
 
-int main( int, char** )
+int main()
 {
    return 0;
 }

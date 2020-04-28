@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_FILE_OPENER_HPP
@@ -21,8 +21,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
       explicit file_opener( const char* filename )
          : m_source( filename ),
            m_fd( open() )
-      {
-      }
+      {}
 
       file_opener( const file_opener& ) = delete;
       file_opener( file_opener&& ) = delete;
@@ -37,7 +36,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
 
       [[nodiscard]] std::size_t size() const
       {
-         struct stat st;  // NOLINT
+         struct stat st;
          errno = 0;
          if( ::fstat( m_fd, &st ) < 0 ) {
             const auto ec = errno;
@@ -53,7 +52,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
       [[nodiscard]] int open() const
       {
          errno = 0;
-         const int fd = ::open( m_source,  // NOLINT
+         const int fd = ::open( m_source,
                                 O_RDONLY
 #if defined( O_CLOEXEC )
                                    | O_CLOEXEC

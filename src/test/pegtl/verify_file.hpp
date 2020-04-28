@@ -1,7 +1,7 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
-#ifndef TAO_PEGTL_SRC_TEST_PEGTL_VERIFY_FILE_HPP  // NOLINT
+#ifndef TAO_PEGTL_SRC_TEST_PEGTL_VERIFY_FILE_HPP
 #define TAO_PEGTL_SRC_TEST_PEGTL_VERIFY_FILE_HPP
 
 #include <tao/pegtl.hpp>
@@ -10,10 +10,12 @@
 
 namespace TAO_PEGTL_NAMESPACE
 {
-   struct file_content : seq< TAO_PEGTL_STRING( "dummy content" ), eol, discard >
+   struct file_content
+      : seq< TAO_PEGTL_STRING( "dummy content" ), eol, discard >
    {};
 
-   struct file_grammar : seq< rep_min_max< 11, 11, file_content >, eof >
+   struct file_grammar
+      : seq< rep_min_max< 11, 11, file_content >, eof >
    {};
 
    template< typename Rule >
@@ -38,8 +40,8 @@ namespace TAO_PEGTL_NAMESPACE
    struct file_control< eof >
       : normal< eof >
    {
-      template< typename Input >
-      static void success( const Input& /*unused*/, bool& flag )
+      template< typename ParseInput >
+      static void success( const ParseInput& /*unused*/, bool& flag )
       {
          flag = true;
       }

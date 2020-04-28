@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_DISABLE_HPP
@@ -6,21 +6,31 @@
 
 #include "../config.hpp"
 
-#include "duseltronik.hpp"
+#include "enable_control.hpp"
 #include "seq.hpp"
-#include "skip_control.hpp"
+#include "success.hpp"
 
 #include "../apply_mode.hpp"
 #include "../rewind_mode.hpp"
-
-#include "../analysis/generic.hpp"
+#include "../type_list.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
    template< typename... Rules >
    struct disable
+      : disable< seq< Rules... > >
+   {};
+
+   template<>
+   struct disable<>
+      : success
+   {};
+
+   template< typename Rule >
+   struct disable< Rule >
    {
-      using analyze_t = analysis::generic< analysis::rule_type::seq, Rules... >;
+      using rule_t = disable;
+      using subs_t = type_list< Rule >;
 
       template< apply_mode,
                 rewind_mode M,
@@ -28,16 +38,16 @@ namespace TAO_PEGTL_NAMESPACE::internal
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      [[nodiscard]] static bool match( Input& in, States&&... st )
+      [[nodiscard]] static bool match( ParseInput& in, States&&... st )
       {
-         return duseltronik< seq< Rules... >, apply_mode::nothing, M, Action, Control >::match( in, st... );
+         return Control< Rule >::template match< apply_mode::nothing, M, Action, Control >( in, st... );
       }
    };
 
    template< typename... Rules >
-   inline constexpr bool skip_control< disable< Rules... > > = true;
+   inline constexpr bool enable_control< disable< Rules... > > = false;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

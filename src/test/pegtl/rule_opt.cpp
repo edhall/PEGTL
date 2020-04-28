@@ -1,8 +1,9 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
-#include "verify_analyze.hpp"
+
+#include "verify_meta.hpp"
 #include "verify_rule.hpp"
 
 namespace TAO_PEGTL_NAMESPACE
@@ -22,6 +23,10 @@ namespace TAO_PEGTL_NAMESPACE
 
    void unit_test()
    {
+      verify_meta< opt<>, internal::success >();
+      verify_meta< opt< eof >, internal::opt< eof >, eof >();
+      verify_meta< opt< eof, any >, internal::opt< internal::seq< eof, any > >, internal::seq< eof, any > >();
+
       verify_analyze< opt< any > >( __LINE__, __FILE__, false, false );
       verify_analyze< opt< eof > >( __LINE__, __FILE__, false, false );
 

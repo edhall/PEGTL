@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_ISTREAM_READER_HPP
@@ -15,8 +15,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    {
       explicit istream_reader( std::istream& s ) noexcept
          : m_istream( s )
-      {
-      }
+      {}
 
       [[nodiscard]] std::size_t operator()( char* buffer, const std::size_t length )
       {

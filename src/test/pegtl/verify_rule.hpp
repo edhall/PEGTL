@@ -1,7 +1,7 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
-#ifndef TAO_PEGTL_SRC_TEST_PEGTL_VERIFY_RULE_HPP  // NOLINT
+#ifndef TAO_PEGTL_SRC_TEST_PEGTL_VERIFY_RULE_HPP
 #define TAO_PEGTL_SRC_TEST_PEGTL_VERIFY_RULE_HPP
 
 #include <cstdlib>
@@ -10,6 +10,7 @@
 #include <tao/pegtl/eol.hpp>
 #include <tao/pegtl/memory_input.hpp>
 #include <tao/pegtl/tracking_mode.hpp>
+#include <tao/pegtl/type_list.hpp>
 
 #include "result_type.hpp"
 #include "verify_impl.hpp"
@@ -19,10 +20,9 @@ namespace TAO_PEGTL_NAMESPACE
    template< typename Rule >
    struct verify_action_impl
    {
-      template< typename Input, typename... States >
-      static void apply( const Input& /*unused*/, States&&... /*unused*/ )
-      {
-      }
+      template< typename ActionInput, typename... States >
+      static void apply( const ActionInput& /*unused*/, States&&... /*unused*/ )
+      {}
    };
 
    template< typename Rule >
@@ -30,14 +30,15 @@ namespace TAO_PEGTL_NAMESPACE
    {
       template< typename... States >
       static void apply0( States&&... /*unused*/ )
-      {
-      }
+      {}
    };
 
    template< typename Rule, typename Eol = eol::lf_crlf >
-   void verify_rule( const std::size_t line, const char* file, const std::string& data, const result_type expected, std::size_t remain = 0 )
+   void verify_rule( const std::size_t line, const char* file, const std::string& data, const result_type expected, int remain = -1 )
    {
-      remain = ( expected == result_type::success ) ? remain : data.size();
+      if( remain < 0 ) {
+         remain = ( expected == result_type::success ) ? 0 : int( data.size() );
+      }
       {
          memory_input< tracking_mode::eager, Eol > in( data.data(), data.data() + data.size(), file, 0, line, 0 );
          verify_impl_one< Rule, nothing >( line, file, data, in, expected, remain );

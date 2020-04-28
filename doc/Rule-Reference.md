@@ -13,15 +13,15 @@ Remember that there are two failure modes, only the first of which usually leads
 
 ## Equivalence
 
-Some rule classes are said to be *equivalent* to a combination of other rules.
-These rules are not completely equivalent to the shown definition because that
-is not how they are implemented, therefore:
+Some rule classes are said to be *equivalent to* a combination of other rules.
+Here, *equivalence* is with respect to which inputs are matched, but not (necessarily) how the rule is implemented.
 
-- Rule equivalence is with regard to which inputs will match, but:
-- *not* with regard to which actions will be invoked while matching.
+For rules other than `must<>` that contain "must" in their name, rule equivalence shows which rule will be used to call the control class' `raise()` function when certain sub-rules fail to match.
 
-However, rule equivalence does show exactly where the `raise<>` rule is inserted
-and therefore which rule will be used to call the control class' `raise()`.
+## Implementation
+
+The "meta data and implementation mapping" section of each rule's description shows both how the rule is implemented and what the [meta data](Meta-Data-and-Visit.md) looks like.
+When the list of sub-rules is empty then the definition of `subs_t` is omitted from the description.
 
 ## Parameter Packs
 
@@ -53,49 +53,84 @@ These rules are in namespace `tao::pegtl`.
 
 ###### `action< A, R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Uses the given class template `A` for [actions](Actions-and-States.md).
-* Actions can still be disabled explicitly (via `disable`) or implicitly (via `at` or `not_at`).
+* Does not `enable` or `disable` actions while matching `R...`.
+* [Meta data] and [implementation] mapping:
+  - `action< A >::rule_t` is `internal::success`
+  - `action< A, R >::rule_t` is `internal::action< A, R >`
+  - `action< A, R >::subs_t` is `type_list< R >`
+  - `action< A, R... >::rule_t` is `internal::action< A, internal::seq< R... > >`
+  - `action< A, R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `control< C, R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Uses the given class template `C` as [control class](Control-and-Debug.md).
+* [Meta data] and [implementation] mapping:
+  - `control< C >::rule_t` is `internal::success`
+  - `control< C, R >::rule_t` is `internal::control< C, R >`
+  - `control< C, R >::subs_t` is `type_list< R >`
+  - `control< C, R... >:rule_t` is `internal::control< C, internal::seq< R... > >`
+  - `control< C, R... >:subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `disable< R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Disables all actions.
+* [Meta data] and [implementation] mapping:
+  - `disable<>::rule_t` is `internal::success`
+  - `disable< R >::rule_t` is `internal::disable<, R >`
+  - `disable< R >::subs_t` is `type_list< R >`
+  - `disable< R... >::rule_t` is `internal::disable< internal::seq< R... > >`
+  - `disable< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `discard`
 
-* Equivalent to `success`, but:
+* [Equivalent] to `success`, but:
 * Calls the input's `discard()` member function.
 * Must not be used where backtracking to before the `discard` might occur and/or nested within a rule for which an action with input can be called.
 * See [Incremental Input](Inputs-and-Parsing.md#incremental-input) for details.
+* [Meta data] and [implementation] mapping:
+  - `discard::rule_t` is `internal::discard`
 
 ###### `enable< R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Enables all actions (if any).
+* [Meta data] and [implementation] mapping:
+  - `enable<>::rule_t` is `internal::success`
+  - `enable< R >::rule_t` is `internal::enable<, R >`
+  - `enable< R >::subs_t` is `type_list< R >`
+  - `enable< R... >::rule_t` is `internal::enable< internal::seq< R... > >`
+  - `enable< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `require< Num >`
 
 * Succeeds if at least `Num` further input bytes are available.
 * With [Incremental Input](Inputs-and-Parsing.md#incremental-input) reads the bytes into the buffer.
+* [Meta data] and [implementation] mapping:
+  - `require< 0 >::rule_t` is `internal::success`
+  - `require< N >::rule_t` is `internal::require< N >`
 
 ###### `state< S, R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Replaces all state arguments with a new instance `s` of type `S`.
 * `s` is constructed with the input and all previous states as arguments.
 * If `seq< R... >` succeeds then `s.success()` is called with the input after the match and all previous states as arguments.
+* [Meta data] and [implementation] mapping:
+  - `state< S >::rule_t` is `internal::success`
+  - `state< S, R >::rule_t` is `internal::state< S, R >`
+  - `state< S, R >::subs_t` is `type_list< R >`
+  - `state< S, R... >::rule_t` is `internal::state< S, internal::seq< R... > >`
+  - `state< S, R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ## Combinators
 
 Combinators (or combinator rules) are rules that combine (other) rules into new ones.
 
-These are the classical PEG combinator rules defined in namespace `tao::pegtl`.
+These are the classical **PEG** combinator rules and are defined in namespace `tao::pegtl`.
 
 ###### `at< R... >`
 
@@ -103,7 +138,12 @@ These are the classical PEG combinator rules defined in namespace `tao::pegtl`.
 * Succeeds if and only if `seq< R... >` would succeed.
 * Consumes nothing, i.e. rewinds after matching.
 * Disables all actions.
-* Allows local failure of `R...` even within `must<>` etc.
+* [Meta data] and [implementation] mapping:
+  - `at<>::rule_t` is `internal::success`
+  - `at< R >::rule_t` is `internal::at< R >`
+  - `at< R >::subs_t` is `type_list< R >`
+  - `at< R... >::rule_t` is `internal::at< internal::seq< R... > >`
+  - `at< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `not_at< R... >`
 
@@ -111,21 +151,36 @@ These are the classical PEG combinator rules defined in namespace `tao::pegtl`.
 * Succeeds if and only if `seq< R... >` would **not** succeed.
 * Consumes nothing, i.e. rewinds after matching.
 * Disables all actions.
-* Allows local failure of `R...` even within `must<>` etc.
+* [Meta data] and [implementation] mapping:
+  - `not_at<>::rule_t` is `internal::failure`
+  - `not_at< R >::rule_t` is `internal::not_at< R >`
+  - `not_at< R >::subs_t` is `type_list< R >`
+  - `not_at< R... >::rule_t` is `internal::not_at< internal::seq< R... > >`
+  - `not_at< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `opt< R... >`
 
 * PEG **optional** *e*?
 * Optional `seq< R... >`, i.e. attempt to match `seq< R... >` and signal success regardless of the result.
-* Equivalent to `sor< seq< R... >, success >`.
-* Allows local failure of `R...` even within `must<>` etc.
+* [Equivalent] to `sor< seq< R... >, success >`.
+* [Meta data] and [implementation] mapping:
+  - `opt<>::rule_t` is `internal::success`
+  - `opt< R >::rule_t` is `internal::opt< R >`
+  - `opt< R >::subs_t` is `type_list< R >`
+  - `opt< R... >::rule_t` is `internal::opt< internal::seq< R... > >`
+  - `opt< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `plus< R... >`
 
 * PEG **one-or-more** *e*+
 * Matches `seq< R... >` as often as possible and succeeds if it matches at least once.
-* Equivalent to `rep_min< 1, R... >`.
+* [Equivalent] to `rep_min< 1, R... >`.
 * `R` must be a non-empty rule pack.
+* [Meta data] and [implementation] mapping:
+  - `plus< R >::rule_t` is `internal::plus< R >`
+  - `plus< R >::subs_t` is `type_list< R >`
+  - `plus< R... >::rule_t` is `internal::plus< internal::seq< R... > >`
+  - `plus< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `seq< R... >`
 
@@ -135,6 +190,12 @@ These are the classical PEG combinator rules defined in namespace `tao::pegtl`.
 * Fails and stops matching when one of the given rules fails.
 * Consumes everything that the rules `R...` consumed.
 * Succeeds if `R` is an empty rule pack.
+* [Meta data] and [implementation] mapping:
+  - `seq<>::rule_t` is `internal::success`
+  - `seq< R >::rule_t` is `internal::seq< R >`
+  - `seq< R >::subs_t` is `type_list< R >`
+  - `seq< R... >::rule_t` is `internal::seq< R... >`
+  - `seq< R... >::subs_t` is `type_list< R... >`
 
 ###### `sor< R... >`
 
@@ -143,15 +204,24 @@ These are the classical PEG combinator rules defined in namespace `tao::pegtl`.
 * Matches the given rules `R...` in the given order.
 * Succeeds and stops matching when one of the given rules succeeds.
 * Consumes whatever the first rule that succeeded consumed.
-* Allows local failure of `R...` even within `must<>` etc.
 * Fails if `R` is an empty rule pack.
+* [Meta data] and [implementation] mapping:
+  - `sor<>::rule_t` is `internal::failure`
+  - `sor< R >::rule_t` is `internal::sor< R >`
+  - `sor< R >::subs_t` is `type_list< R >`
+  - `sor< R... >::rule_t` is `internal::sor< R... >`
+  - `sor< R... >::subs_t` is `type_list< R... >`
 
 ###### `star< R... >`
 
 * PEG **zero-or-more** *e**
 * Matches `seq< R... >` as often as possible and always succeeds.
-* Allows local failure of `R...` even within `must<>` etc.
 * `R` must be a non-empty rule pack.
+* [Meta data] and [implementation] mapping:
+  - `star< R >::rule_t` is `internal::star< R >`
+  - `star< R >::subs_t` is `type_list< R >`
+  - `star< R... >::rule_t` is `internal::star< internal::seq< R... > >`
+  - `star< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ## Convenience
 
@@ -164,133 +234,252 @@ These rules are in namespace `tao::pegtl`.
 ###### `if_must< R, S... >`
 
 * Attempts to match `R` and depending on the result proceeds with either `must< S... >` or `failure`.
-* Equivalent to `seq< R, must< S... > >`.
-* Equivalent to `if_then_else< R, must< S... >, failure >`.
+* [Equivalent] to `seq< R, must< S... > >`.
+* [Equivalent] to `if_then_else< R, must< S... >, failure >`.
+* [Meta data] and [implementation] mapping:
+  - `if_must< R >::rule_t` is `internal::if_must< false, R >`
+  - `if_must< R >::subs_t` is `type_list< R >`
+  - `if_must< R, S... >::rule_t` is `internal::if_must< false, R, S... >`
+  - `if_must< R, S... >::subs_t` is `type_list< R, internal::must< S... > >`
+
+Note that the `false` template parameter to `internal::if_must` corresponds to the `failure` in the equivalent description using `if_then_else`.
 
 ###### `if_must_else< R, S, T >`
 
 * Attempts to match `R` and depending on the result proceeds with either `must< S >` or `must< T >`.
-* Equivalent to `if_then_else< R, must< S >, must< T > >`.
+* [Equivalent] to `if_then_else< R, must< S >, must< T > >`.
+* [Meta data] and [implementation] mapping:
+  - `if_must_else< R, S, T >::rule_t` is `internal::if_then_else< R, internal::must< S >, internal::must< T > >`
+  - `if_must_else< R, S, T >::subs_t` is `type_list< R, internal::must< S >, internal::must< T > >`
 
 ###### `if_then_else< R, S, T >`
 
-* Equivalent to `sor< seq< R, S >, seq< not_at< R >, T > >`.
+* [Equivalent] to `sor< seq< R, S >, seq< not_at< R >, T > >`.
+* [Meta data] and [implementation] mapping:
+  - `if_then_else< R, S, T >::rule_t` is `internal::if_then_else< R, S, T>`
+  - `if_then_else< R, S, T >::subs_t` is `type_list< R, S, T >`
 
 ###### `list< R, S >`
 
 * Matches a non-empty list of `R` separated by `S`.
-* Equivalent to `seq< R, star< S, R > >`.
+* [Equivalent] to `seq< R, star< S, R > >`.
+* [Meta data] and [implementation] mapping:
+  - `list< R, S >::rule_t` is `internal::seq< R, internal::star< S, R > >`
+  - `list< R, S >::subs_t` is `type_list< R, internal::star< S, R > >`
 
 ###### `list< R, S, P >`
 
 * Matches a non-empty list of `R` separated by `S` where each `S` can be padded by `P`.
-* Equivalent to `seq< R, star< pad< S, P >, R > >`.
+* [Equivalent] to `seq< R, star< pad< S, P >, R > >`.
+* [Meta data] and [implementation] mapping:
+  - `list< R, S, P >::rule_t` is `internal::seq< R, internal::star< internal::pad< S, P >, R > >`
+  - `list< R, S, P >::subs_t` is `type_list< R, internal::star< internal::pad< S, P >, R > >`
 
 ###### `list_must< R, S >`
 
 * Matches a non-empty list of `R` separated by `S`.
 * Similar to `list< R, S >`, but if there is an `S` it **must** be followed by an `R`.
-* Equivalent to `seq< R, star< if_must< S, R > > >`.
+* [Equivalent] to `seq< R, star< if_must< S, R > > >`.
+* [Meta data] and [implementation] mapping:
+  - `list_must< R, S >::rule_t` is `internal::seq< R, internal::star< S, internal::must< R > > >`
+  - `list_must< R, S >::subs_t` is `type_list< R, internal::star< S, internal::must< R > > >`
 
 ###### `list_must< R, S, P >`
 
 * Matches a non-empty list of `R` separated by `S` where each `S` can be padded by `P`.
 * Similar to `list< R, S, P >`, but if there is an `S` it **must** be followed by an `R`.
-* Equivalent to `seq< R, star< if_must< pad< S, P >, R > > >`.
+* [Equivalent] to `seq< R, star< if_must< pad< S, P >, R > > >`.
+* [Meta data] and [implementation] mapping:
+  - `list_must< R, S, P >::rule_t` is `internal::seq< R, internal::star< internal::pad< S, P >, internal::must< R > > >`
+  - `list_must< R, S, P >::subs_t` is `type_list< R, internal::star< internal::pad< S, P >, internal::must< R > > >`
 
 ###### `list_tail< R, S >`
 
 * Matches a non-empty list of `R` separated by `S` with optional trailing `S`.
-* Equivalent to `seq< list< R, S >, opt< S > >`.
+* [Equivalent] to `seq< list< R, S >, opt< S > >`.
+* [Meta data] and [implementation] mapping:
+  - `list_tail< R, S >::rule_t` is `internal::seq< R, internal::star< S, R >, internal::opt< S > >`
+  - `list_tail< R, S >::subs_t` is `type_list< R, internal::star< S, R >, internal::opt< S > >`
 
 ###### `list_tail< R, S, P >`
 
 * Matches a non-empty list of `R` separated by `S` with optional trailing `S` and padding `P` inside the list.
-* Equivalent to `seq< list< R, S, P >, opt< star< P >, S > >`.
+* [Equivalent] to `seq< list< R, S, P >, opt< star< P >, S > >`.
+* [Meta data] and [implementation] mapping:
+  - `list_tail< R, S, P >::rule_t` is `internal::seq< R, internal::star< internal::pad< S, P >, R >, internal::opt< internal::star< P >, S > >`
+  - `list_tail< R, S, P >::subs_t` is `type_list< R, internal::star< internal::pad< S, P >, R > >, internal::opt< internal::star< P >, S > >`
 
 ###### `minus< M, S >`
 
 * Succeeds if `M` matches, and `S` does *not* match *all* of the input that `M` matched.
-* Equivalent to `rematch< M, not_at< S, eof > >`.
+* [Equivalent] to `rematch< M, not_at< S, eof > >`.
+* [Meta data] and [implementation] mapping:
+  - `minus< M, S >::rule_t` is `internal::rematch< M, internal::not_at< S, internal::eof > >`
+  - `minus< M, S >::subs_t` is `type_list< M, internal::not_at< S, internal::eof > >`
 
 ###### `must< R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Converts local failure of `R...` into global failure.
 * Calls `raise< R >` for the `R` that failed.
-* Equivalent to `seq< sor< R, raise< R > >... >`.
+* [Equivalent] to `seq< sor< R, raise< R > >... >`.
+* [Meta data] and [implementation] mapping:
+  - `must<>::rule_t` is `internal::success`
+  - `must< R >::rule_t` is `internal::must< R >`
+  - `must< R >::subs_t` is `type_list< R >`
+  - `must< R... >::rule_t` is `internal::seq< internal::must< R >... >::rule_t`
+  - `must< R... >::subs_t` is `type_list< internal::must< R... > >`
+
+Note that `must` uses a different pattern to handle multiple sub-rules compared to the other `seq`-equivalent rules (which use `rule< seq< R... > >` rather than `seq< rule< R >... >`).
 
 ###### `opt_must< R, S... >`
 
-* Equivalent to `opt< if_must< R, S... > >`.
+* [Equivalent] to `opt< if_must< R, S... > >`.
+* [Equivalent] to `if_then_else< R, must< S... >, success >`.
+* [Meta data] and [implementation] mapping:
+  - `opt_must< R >::rule_t` is `internal::if_must< true, R >`
+  - `opt_must< R >::subs_t` is `type_list< R >`
+  - `opt_must< R, S... >::rule_t` is `internal::if_must< true, R, S... >`
+  - `opt_must< R, S... >::subs_t` is `type_list< R, internal::must< S... > >`
+
+Note that the `true` template parameter to `internal::if_must` corresponds to the `success` in the equivalent description using `if_then_else`.
 
 ###### `pad< R, S, T = S >`
 
 * Matches an `R` that can be padded by arbitrary many `S` on the left and `T` on the right.
-* Equivalent to `seq< star< S >, R, star< T > >`.
+* [Equivalent] to `seq< star< S >, R, star< T > >`.
+* [Meta data] and [implementation] mapping:
+  - `pad< R, S, T >::rule_t` is `internal::seq< internal::star< S >, R, internal::star< T > >`
+  - `pad< R, S, T >::subs_t` is `type_list< internal::star< S >, R, internal::star< T > >`
 
 ###### `pad_opt< R, P >`
 
 * Matches an optional `R` that can be padded by arbitrary many `P` or just arbitrary many `P`.
-* Equivalent to `seq< star< P >, opt< R, star< P > > >`.
+* [Equivalent] to `seq< star< P >, opt< R, star< P > > >`.
+* [Meta data] and [implementation] mapping:
+  - `pad_opt< R, P >::rule_t` is `internal::seq< internal::star< P >, internal::opt< R, internal::star< P > > >`
+  - `pad_opt< R, P >::subs_t` is `type_list< internal::star< P >, internal::opt< R, internal::star< P > > >`
 
 ###### `rematch< R, S... >`
 
 * Succeeds if `R` matches, and each `S` matches the input that `R` matched.
 * Ignores all `S` for the [grammar analysis](Grammar-Analysis.md).
+* [Meta data] and [implementation] mapping:
+  - `rematch< R, S... >::rule_t` is `internal::rematch< R, S... >`
+  - `rematch< R, S... >::subs_t` is `type_list< R, S... >`
 
 ###### `rep< Num, R... >`
 
 * Matches `seq< R... >` for `Num` times without checking for further matches.
-* Equivalent to `seq< seq< R... >, ..., seq< R... > >` where `seq< R... >` is repeated `Num` times.
+* [Equivalent] to `seq< seq< R... >, ..., seq< R... > >` where `seq< R... >` is repeated `Num` times.
+* [Meta data] and [implementation] mapping:
+  - `rep< 0, R... >::rule_t` is `internal::success`
+  - `rep< N >::rule_t` is `internal::success`
+  - `rep< N, R >::rule_t` is `internal::rep< N, R >`
+  - `rep< N, R >::subs_t` is `type_list< R >`
+  - `rep< N, R... >::rule_t` is `internal::rep< N, internal::seq< R... > >`
+  - `rep< N, R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `rep_max< Max, R... >`
 
 * Matches `seq< R... >` for at most `Max` times and verifies that it doesn't match more often.
-* Equivalent to `rep_min_max< 0, Max, R... >`.
+* [Equivalent] to `rep_min_max< 0, Max, R... >`.
+* [Meta data] and [implementation] mapping:
+  - `rep_max< 0, R >::rule_t` is `internal::not_at< R >`
+  - `rep_max< 0, R >::subs_t` is `type_list< R >`
+  - `rep_max< 0, R... >::rule_t` is `internal::not_at< internal::seq< R... > >`
+  - `rep_max< 0, R... >::subs_t` is `type_list< internal::seq< R... > >`
+  - `rep_max< Max >::rule_t` is `internal::failure`
+  - `rep_max< Max, R >::rule_t` is `internal::rep_min_max< 0, Max, R >`
+  - `rep_max< Max, R >::subs_t` is `type_list< R >`
+  - `rep_max< Max, R... >::rule_t` is `internal::rep_min_max< 0, Max, internal::seq< R... > >`
+  - `rep_max< Max, R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `rep_min< Min, R... >`
 
 * Matches `seq< R... >` as often as possible and succeeds if it matches at least `Min` times.
-* Equivalent to `seq< rep< Min, R... >, star< R... > >`.
+* [Equivalent] to `seq< rep< Min, R... >, star< R... > >`.
 * `R` must be a non-empty rule pack.
+* [Meta data] and [implementation] mapping:
+  - `rep_min< Min, R... >::rule_t` is `internal::seq< internal::rep< Min, R... >, internal::star< R... > >`
+  - `rep_min< Min, R... >::subs_t` is `type_list< internal::rep< Min, R... >, internal::star< R... > >`
 
 ###### `rep_min_max< Min, Max, R... >`
 
 * Matches `seq< R... >` for `Min` to `Max` times and verifies that it doesn't match more often.
-* Equivalent to `seq< rep< Min, R... >, rep_opt< Max - Min, R... >, not_at< R... > >`.
+* [Equivalent] to `seq< rep< Min, R... >, rep_opt< Max - Min, R... >, not_at< R... > >`.
+* [Meta data] and [implementation] mapping:
+  - `rep_min_max< 0, 0, R >::rule_t` is `internal::not_at< R >`
+  - `rep_min_max< 0, 0, R >::subs_t` is `type_list< R >`
+  - `rep_min_max< 0, 0, R... >::rule_t` is `internal::not_at< internal::seq< R... > >`
+  - `rep_min_max< 0, 0, R... >::subs_t` is `type_list< internal::seq< R... > >`
+  - `rep_min_max< Min, Max >::rule_t` is `internal::failure`
+  - `rep_min_max< Min, Max, R >::rule_t` is `internal::rep_min_max< Min, Max, R >`
+  - `rep_min_max< Min, Max, R >::subs_t` is `type_list< R >`
+  - `rep_min_max< Min, Max, R... >::rule_t` is `internal::rep_min_max< Min, Max, internal::seq< R... > >`
+  - `rep_min_max< Min, Max, R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `rep_opt< Num, R... >`
 
 * Matches `seq< R... >` for zero to `Num` times without check for further matches.
-* Equivalent to `rep< Num, opt< R... > >`.
+* [Equivalent] to `rep< Num, opt< R... > >`.
+* [Meta data] and [implementation] mapping:
+  - `rep_opt< 0, R... >::rule_t` is `internal::success`
+  - `rep_opt< Num >::rule_t` is `internal::success`
+  - `rep_opt< Num, R... >::rule_t` is `internal::seq< internal::rep< Num, R... >, internal::star< R... > >`
+  - `rep_opt< Num, R... >::subs_t` is `type_list< internal::rep< Num, R... >, internal::star< R... > >`
 
 ###### `star_must< R, S... >`
 
-* Equivalent to `star< if_must< R, S... > >`.
+* [Equivalent] to `star< if_must< R, S... > >`.
+* [Meta data] and [implementation] mapping:
+  - `star_must< R >::rule_t` is `internal::star< internal::if_must< false, R > >`
+  - `star_must< R >::subs_t` is `type_list< internal::if_must< false, R > >`
+  - `star_must< R, S... >::rule_t` is `internal::star< internal::if_must< false, R, S... > >`
+  - `star_must< R, S... >::subs_t` is `type_list< internal::if_must< false, R, S... > >`
 
 ###### `try_catch< R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Converts global failure (exception) into local failure (return value `false`).
 * Catches exceptions of type `tao::pegtl::parse_error`.
+* [Meta data] and [implementation] mapping:
+  - `try_catch<>::rule_t` is `internal::success`
+  - `try_catch< R >::rule_t` is `internal::try_catch_type< parse_error, R >`
+  - `try_catch< R >::subs_t` is `type_list< R >`
+  - `try_catch< R... >::rule_t` is `internal::try_catch_type< parse_error, internal::seq< R... > >`
+  - `try_catch< R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `try_catch_type< E, R... >`
 
-* Equivalent to `seq< R... >`, but:
+* [Equivalent] to `seq< R... >`, but:
 * Converts global failure (exception) into local failure (return value `false`).
 * Catches exceptions of type `E`.
+* [Meta data] and [implementation] mapping:
+  - `try_catch_type< E >::rule_t` is `internal::success`
+  - `try_catch_type< E, R >::rule_t` is `internal::try_catch_type< E, R >`
+  - `try_catch_type< E, R >::subs_t` is `type_list< R >`
+  - `try_catch_type< E, R... >::rule_t` is `internal::try_catch_type< E, internal::seq< R... > >`
+  - `try_catch_type< E, R... >::subs_t` is `type_list< internal::seq< R... > >`
 
 ###### `until< R >`
 
 * Consumes all input until `R` matches.
-* Equivalent to `until< R, any >`.
+* [Equivalent] to `until< R, any >`.
+* [Meta data] and [implementation] mapping:
+  - `until< R >::rule_t` is `internal::until< R >`
+  - `until< R >::subs_t` is `type_list< R >`
 
 ###### `until< R, S... >`
 
 * Matches `seq< S... >` as long as `at< R >` does not match and succeeds when `R` matches.
-* Equivalent to `seq< star< not_at< R >, not_at< eof >, S... >, R >`.
+* [Equivalent] to `seq< star< not_at< R >, not_at< eof >, S... >, R >`.
 * Does not apply if `S` is an empty rule pack, see the previous entry for the semantics of `until< R >`.
+* [Meta data] and [implementation] mapping:
+  - `until< R, S >::rule_t` is `internal::until< R, S >`
+  - `until< R, S >::subs_t` is `type_list< R, S >`
+  - `until< R, S... >::rule_t` is `internal::until< R, internal::seq< S... > >`
+  - `until< R, S... >::subs_t` is `type_list< R, internal::seq< S... > >`
 
 ## Action Rules
 
@@ -298,25 +487,32 @@ These rules are in namespace `tao::pegtl`.
 
 These rules replicate the intrusive way actions were called from within the grammar in the PEGTL 0.x with the `apply<>` and `if_apply<>` rules.
 The actions for these rules are classes (rather than class templates as required for `parse()` and the `action<>`-rule).
-These rules respect the current `apply_mode`, but don't use the control-class to invoke the actions.
+These rules respect the current `apply_mode`, but do **not** use the control class to invoke the actions.
 
 ###### `apply< A... >`
 
 * Calls `A::apply()` for all `A`, in order, with an empty input and all states as arguments.
 * If any `A::apply()` has a boolean return type and returns `false`, no further `A::apply()` calls are made and the result is equivalent to `failure`, otherwise:
-* Equivalent to `success` wrt. parsing.
+* [Equivalent] to `success` wrt. parsing.
+* [Meta data] and [implementation] mapping:
+  - `apply< A... >::rule_t` is `internal::apply< A... >`
 
 ###### `apply0< A... >`
 
 * Calls `A::apply0()` for all `A`, in order, with all states as arguments.
 * If any `A::apply0()` has a boolean return type and returns `false`, no further `A::apply0()` calls are made and the result is equivalent to `failure`, otherwise:
-* Equivalent to `success` wrt. parsing.
+* [Equivalent] to `success` wrt. parsing.
+* [Meta data] and [implementation] mapping:
+  - `apply0< A... >::rule_t` is `internal::apply0< A... >`
 
 ###### `if_apply< R, A... >`
 
-* Equivalent to `seq< R, apply< A... > >` wrt. parsing, but also:
+* [Equivalent] to `seq< R, apply< A... > >` wrt. parsing, but also:
 * If `R` matches, calls `A::apply()`, for all `A`, in order, with the input matched by `R` and all states as arguments.
 * If any `A::apply()` has a boolean return type and returns `false`, no further `A::apply()` calls are made.
+* [Meta data] and [implementation] mapping:
+  - `if_apply< R, A... >::rule_t` is `internal::if_apply< R, A... >`
+  - `if_apply< R, A... >::subs_t` is `type_list< R >`
 
 ## Atomic Rules
 
@@ -329,27 +525,52 @@ Atomic rules do not rely on other rules.
 * Succeeds at "beginning-of-file", i.e. when the input's `byte()` member function returns zero.
 * Does not consume input.
 * Does **not** work with inputs that don't have a `byte()` member function.
+* [Meta data] and [implementation] mapping:
+  - `bof::rule_t` is `internal::bof`
 
 ###### `bol`
 
 * Succeeds at "beginning-of-line", i.e. when the input's `byte_in_line()` member function returns zero.
 * Does not consume input.
 * Does **not** work with inputs that don't have a `byte_in_line()` member function.
+* [Meta data] and [implementation] mapping:
+  - `bol::rule_t` is `internal::bol`
 
 ###### `bytes< Num >`
 
 * Succeeds when the input contains at least `Num` further bytes.
 * Consumes these `Num` bytes from the input.
+* [Meta data] and [implementation] mapping:
+  - `bytes< 0 >::rule_t` is `internal::success`
+  - `bytes< Num >::rule_t` is `internal::bytes< Num >`
 
 ###### `eof`
 
 * Succeeds at "end-of-file", i.e. when the input is empty or all input has been consumed.
 * Does not consume input.
+* [Meta data] and [implementation] mapping:
+  - `eof::rule_t` is `internal::eof`
+
+###### `eol`
+
+* Depends on the `Eol` template parameter of the input, by default:
+* Matches and consumes a Unix or MS-DOS line ending, that is:
+* [Equivalent] to `sor< one< '\n' >, string< '\r', '\n' > >`.
+* [Meta data] and [implementation] mapping:
+  - `eol::rule_t` is `internal::eol`
+
+###### `eolf`
+
+* [Equivalent] to `sor< eof, eol >`.
+* [Meta data] and [implementation] mapping:
+  - `eolf::rule_t` is `internal::eolf`
 
 ###### `failure`
 
 * Dummy rule that never succeeds.
 * Does not consume input.
+* [Meta data] and [implementation] mapping:
+  - `failure::rule_t` is `internal::failure`
 
 ###### `raise< T >`
 
@@ -357,11 +578,15 @@ Atomic rules do not rely on other rules.
 * Calls the control-class' `Control< T >::raise()` static member function.
 * `T` *can* be a rule, but it does not have to be a rule.
 * Does not consume input.
+* [Meta data] and [implementation] mapping:
+  - `raise< T >::rule_t` is `internal::raise< T >`
 
 ###### `success`
 
 * Dummy rule that always succeeds.
 * Does not consume input.
+* [Meta data] and [implementation] mapping:
+  - `success::rule_t` is `internal::success`
 
 ## ASCII Rules
 
@@ -377,97 +602,124 @@ and all possible byte values excluding `'a'`, respectively. However the characte
 for example the Euro sign code point `U+20AC`, which is encoded by the UTF-8 sequence `E2 82 AC`,
 can be matched by either `tao::pegtl::ascii::string< 0xe2, 0x82, 0xac >` or `tao::pegtl::utf8::one< 0x20ac >`.)
 
+ASCII rules do not usually rely on other rules.
+
 ###### `alnum`
 
 * Matches and consumes a single ASCII alphabetic or numeric character.
-* Equivalent to `ranges< 'a', 'z', 'A', 'Z', '0', '9' >`.
+* [Equivalent] to `ranges< 'a', 'z', 'A', 'Z', '0', '9' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::alnum::rule_t` is `internal::ranges< internal::peek_char, 'a', 'z', 'A', 'Z', '0', '9' >`
 
 ###### `alpha`
 
 * Matches and consumes a single ASCII alphabetic character.
-* Equivalent to `ranges< 'a', 'z', 'A', 'Z' >`.
+* [Equivalent] to `ranges< 'a', 'z', 'A', 'Z' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::alpha::rule_t` is `internal::ranges< internal::peek_char, 'a', 'z', 'A', 'Z' >`
 
 ###### `any`
 
 * Matches and consumes any single byte, including all ASCII characters.
-* Equivalent to `bytes< 1 >`.
+* [Equivalent] to `bytes< 1 >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::any::rule_t` is `internal::any< internal::peek_char >`
 
 ###### `blank`
 
 * Matches and consumes a single ASCII horizontal space or horizontal tabulator character.
-* Equivalent to `one< ' ', '\t' >`.
+* [Equivalent] to `one< ' ', '\t' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::blank::rule_t` is `internal::one< internal::result_on_found::success, internal::peek_char, ' ', '\t' >`
 
 ###### `digit`
 
 * Matches and consumes a single ASCII decimal digit character.
-* Equivalent to `range< '0', '9' >`.
+* [Equivalent] to `range< '0', '9' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::digit::rule_t` is `internal::range< internal::result_on_found::success, internal::peek_char, '0', '9' >`
 
 ###### `ellipsis`
 
 * Matches and consumes three dots.
-* Equivalent to `three< '.' >`.
-
-###### `eol`
-
-* Depends on the `Eol` template parameter of the input, by default:
-* Matches and consumes a Unix or MS-DOS line ending, that is:
-* Equivalent to `sor< one< '\n' >, string< '\r', '\n' > >`.
-
-###### `eolf`
-
-* Equivalent to `sor< eof, eol >`.
+* [Equivalent] to `three< '.' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::ellipsis::rule_t` is `internal::string< '.', '.', '.' >`
 
 ###### `forty_two< C... >`
 
-* Equivalent to `rep< 42, one< C... > >`.
+* [Equivalent] to `rep< 42, one< C... > >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::forty_two< C >::rule_t` is `internal_rep< 42, internal::one< internal::result_on_found::success, internal::peek_char, C > >`
 
 ###### `identifier_first`
 
 * Matches and consumes a single ASCII character permissible as first character of a C identifier.
-* Equivalent to `ranges< 'a', 'z', 'A', 'Z', '_' >`.
+* [Equivalent] to `ranges< 'a', 'z', 'A', 'Z', '_' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::identifier_first::rule_t` is `internal::ranges< internal::peek_char, 'a', 'z', 'A', 'Z', '_' >`
 
 ###### `identifier_other`
 
 * Matches and consumes a single ASCII character permissible as subsequent character of a C identifier.
-* Equivalent to `ranges< 'a', 'z', 'A', 'Z', '0', '9', '_' >`.
+* [Equivalent] to `ranges< 'a', 'z', 'A', 'Z', '0', '9', '_' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::identifier_first::rule_t` is `internal::ranges< internal::peek_char, 'a', 'z', 'A', 'Z', '0', '9', '_' >`
 
 ###### `identifier`
 
 * Matches and consumes an ASCII identifier as defined for the C programming language.
-* Equivalent to `seq< identifier_first, star< identifier_other > >`.
+* [Equivalent] to `seq< identifier_first, star< identifier_other > >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::identifier::rule_t` is `internal::seq< identifier_first, internal::star< identifier_other > >`.
 
 ###### `istring< C... >`
 
 * Matches and consumes the given ASCII string `C...` with case insensitive matching.
 * Similar to `string< C... >`, but:
 * For ASCII letters a-z and A-Z the match is case insensitive.
+* [Meta data] and [implementation] mapping:
+  - `ascii::istring<>::rule_t` is `internal::success`
+  - `ascii::istring< C... >::rule_t` is `internal::istring< C... >`
 
 ###### `keyword< C... >`
 
-* Matches and consumes a non-empty string not followed by a subsequent identifier character.
-* Equivalent to `seq< string< C... >, not_at< identifier_other > >`.
+* Matches and consumes a non-empty string not followed by an identifier character.
+* [Equivalent] to `seq< string< C... >, not_at< identifier_other > >`.
+* `C` must be a non-empty character pack.
+* [Meta data] and [implementation] mapping:
+  - `ascii::keyword< C... >::rule_t` is `internal::seq< internal::string< C... >, internal::not_at< internal::ranges< internal::peek_char, 'a', 'z', 'A', 'Z', '0', '9', '_' > > >`
 
 ###### `lower`
 
 * Matches and consumes a single ASCII lower-case alphabetic character.
-* Equivalent to `range< 'a', 'z' >`.
+* [Equivalent] to `range< 'a', 'z' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::lower::rule_t` is `internal::range< internal::result_on_found::success, internal::peek_char, 'a', 'z' >`
 
 ###### `not_one< C... >`
 
 * Succeeds when the input is not empty, and:
 * `C` is an empty character pack or the next input byte is **not** one of `C...`.
 * Consumes one byte when it succeeds.
+* [Meta data] and [implementation] mapping:
+  - `ascii::not_one<>::rule_t` is `internal::any< internal::peek_char >`
+  - `ascii::not_one< C... >::rule_t` is `internal::one< result_on_found::failure, internal::peek_char, C... >`
 
 ###### `not_range< C, D >`
 
 * Succeeds when the input is not empty, and:
 * The next input byte is **not** in the closed range `C ... D`.
 * Consumes one byte when it succeeds.
+* [Meta data] and [implementation] mapping:
+  - `ascii::not_range< C, C >::rule_t` is `internal::one< result_on_found::failure, internal::peek_char, C >`
+  - `ascii::not_range< C, D >::rule_t` is `internal::range< result_on_found::failure, internal::peek_char, C, D >`
 
 ###### `nul`
 
 * Matches and consumes an ASCII nul character.
-* Equivalent to `one< 0 >`.
+* [Equivalent] to `one< '\0' >`.
+  - `ascii::nul::rule_t` is `internal::one< result_on_found::success, internal::peek_char, 0 >`
 
 ###### `one< C... >`
 
@@ -475,44 +727,63 @@ can be matched by either `tao::pegtl::ascii::string< 0xe2, 0x82, 0xac >` or `tao
 * The next input byte is one of `C...`.
 * Consumes one byte when it succeeds.
 * Fails if `C` is an empty character pack.
+* [Meta data] and [implementation] mapping:
+  - `ascii::not_one<>::rule_t` is `internal::failure`
+  - `ascii::not_one< C... >::rule_t` is `internal::one< result_on_found::success, internal::peek_char, C... >`
 
 ###### `print`
 
 * Matches and consumes any single ASCII character traditionally defined as printable.
-* Equivalent to `range< 32, 126 >`.
+* [Equivalent] to `range< 32, 126 >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::print::rule_t` is `internal::range< internal::result_on_found::success, internal::peek_char, 32, 126 >`
 
 ###### `range< C, D >`
 
 * Succeeds when the input is not empty, and:
 * The next input byte is in the closed range `C ... D`.
 * Consumes one byte when it succeeds.
+* [Meta data] and [implementation] mapping:
+  - `ascii::range< C, C >::rule_t` is `internal::one< result_on_found::success, internal::peek_char, C >`
+  - `ascii::range< C, D >::rule_t` is `internal::range< result_on_found::success, internal::peek_char, C, D >`
 
 ###### `ranges< C1, D1, C2, D2, ... >`
-
-* Equivalent to `sor< range< C1, D1 >, range< C2, D2 >, ... >`.
-
 ###### `ranges< C1, D1, C2, D2, ..., E >`
 
-* Equivalent to `sor< range< C1, D1 >, range< C2, D2 >, ..., one< E > >`.
+* [Equivalent] to `sor< range< C1, D1 >, range< C2, D2 >, ... >`.
+* [Equivalent] to `sor< range< C1, D1 >, range< C2, D2 >, ..., one< E > >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::ranges<>::rule_t` is `internal::failure`
+  - `ascii::ranges< E >::rule_t` is `internal::one< result_on_found::success, internal::peek_char, E >`
+  - `ascii::ranges< C, D >::rule_t` is `internal::range< result_on_found::success, internal::peek_char, C, D >`
+  - `ascii::ranges< C... >::rule_t` is `internal::ranges< internal::peek_char, C... >`
 
 ###### `seven`
 
 * Matches and consumes any single true ASCII character that fits into 7 bits.
-* Equivalent to `range< 0, 127 >`.
+* [Equivalent] to `range< 0, 127 >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::seven::rule_t` is `internal::range< internal::result_on_found::success, internal::peek_char, 0, 127 >`
 
 ###### `shebang`
 
-* Equivalent to `seq< string< '#', '!' >, until< eolf > >`.
+* [Equivalent] to `if_must< string< '#', '!' >, until< eolf > >`.
 
 ###### `space`
 
 * Matches and consumes a single space, line-feed, carriage-return, horizontal-tab, vertical-tab or form-feed.
-* Equivalent to `one< ' ', '\n', '\r', '\t', '\v', '\f' >`.
+* [Equivalent] to `one< ' ', '\n', '\r', '\t', '\v', '\f' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::shebang::rule_t` is `internal::seq< false, internal::string< '#', '!' >, internal::until< internal::eolf > >`
+  - `ascii::shebang::subs_t` is `type_list< internal::string< '#', '!' >, internal::until< internal::eolf > >`
 
 ###### `string< C... >`
 
 * Matches and consumes a string, a sequence of bytes or single-byte characters.
-* Equivalent to `seq< one< C >... >`.
+* [Equivalent] to `seq< one< C >... >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::string<>::rule_t` is `internal::success`
+  - `ascii::string< C... >::rule_t` is `internal::string< C... >`
 
 ###### `TAO_PEGTL_ISTRING( "..." )`
 
@@ -540,22 +811,30 @@ can be matched by either `tao::pegtl::ascii::string< 0xe2, 0x82, 0xac >` or `tao
 * Succeeds when the input contains at least three bytes, and:
 * These three input bytes are all `C`.
 * Consumes three bytes when it succeeds.
+* [Meta data] and [implementation] mapping:
+  - `ascii::three< C >::rule_t` is `internal::string< C, C, C >`
 
 ###### `two< C >`
 
 * Succeeds when the input contains at least two bytes, and:
 * These two input bytes are both `C`.
 * Consumes two bytes when it succeeds.
+* [Meta data] and [implementation] mapping:
+  - `ascii::two< C >::rule_t` is `internal::string< C, C >`
 
 ###### `upper`
 
 * Matches and consumes a single ASCII upper-case alphabetic character.
-* Equivalent to `range< 'A', 'Z' >`.
+* [Equivalent] to `range< 'A', 'Z' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::upper::rule_t` is `internal::range< internal::result_on_found::success, internal::peek_char, 'A', 'Z' >`
 
 ###### `xdigit`
 
 * Matches and consumes a single ASCII hexadecimal digit character.
-* Equivalent to `ranges< '0', '9', 'a', 'f', 'A', 'F' >`.
+* [Equivalent] to `ranges< '0', '9', 'a', 'f', 'A', 'F' >`.
+* [Meta data] and [implementation] mapping:
+  - `ascii::xdigit::rule_t` is `internal::ranges< internal::peek_char, '0', '9', 'a', 'f', 'A', 'F' >`
 
 ## Unicode Rules
 
@@ -576,8 +855,11 @@ The following limitations apply to the UTF-16 and UTF-32 rules:
 
 * Unaligned input leads to unaligned memory access.
 * The line and column numbers are not counted correctly.
+* They are not automatically included with `tao/pegtl.hpp`.
 
-Unaligned memory is no problem on x86 compatible processors; on some other architectures like ARM an unaligned access will crash the application.
+The UTF-16 and UTF-32 rules need to be manually included from their corresponding headers in the `contrib` section.
+
+Unaligned memory is no problem on x86 compatible processors; on ARM and most other architectures an unaligned access will crash the application.
 
 In the following descriptions a Unicode code point is considered *valid* when it is in the range `0` to `0x10ffff`.
 The parameter N stands for the size of the encoding of the next Unicode code point in the input, i.e.
@@ -588,6 +870,8 @@ The parameter N stands for the size of the encoding of the next Unicode code poi
 
 It is an error when a code unit in the range `0xd800` to `0xdfff` is encountered outside of a valid UTF-16 surrogate pair (this changed in version 2.6.0).
 
+Unicode rules do not rely on other rules.
+
 ###### `any`
 
 * Succeeds when the input is not empty, and:
@@ -596,7 +880,7 @@ It is an error when a code unit in the range `0xd800` to `0xdfff` is encountered
 
 ###### `bom`
 
-* Equivalent to `one< 0xfeff >`.
+* [Equivalent] to `one< 0xfeff >`.
 
 ###### `not_one< C... >`
 
@@ -628,28 +912,33 @@ It is an error when a code unit in the range `0xd800` to `0xdfff` is encountered
 
 ###### `ranges< C1, D1, C2, D2, ... >`
 
-* Equivalent to `sor< range< C1, D1 >, range< C2, D2 >, ... >`.
+* [Equivalent] to `sor< range< C1, D1 >, range< C2, D2 >, ... >`.
 
 ###### `ranges< C1, D1, C2, D2, ..., E >`
 
-* Equivalent to `sor< range< C1, D1 >, range< C2, D2 >, ..., one< E > >`.
+* [Equivalent] to `sor< range< C1, D1 >, range< C2, D2 >, ..., one< E > >`.
 
 ###### `string< C... >`
 
-* Equivalent to `seq< one< C >... >`.
+* [Equivalent] to `seq< one< C >... >`.
 
 ### ICU Support
 
 The following rules depend on the [International Components for Unicode (ICU)](http://icu-project.org/) that provide the means to match characters with specific Unicode character properties.
-Because of the external dependency, the rules are in the contrib-section, and the required header files are not automatically included in `tao/pegtl.hpp`.
+Because of the external dependency, the rules are in contrib, and the required header files are not automatically included in `tao/pegtl.hpp`.
 
 The ICU-based rules are again available in multiple versions,
 
-* in namespace `tao::pegtl::icu::utf8` for UTF-8 encoded inputs,
-* in namespace `tao::pegtl::icu::utf16_be` for big-endian UTF-16 encoded inputs,
-* in namespace `tao::pegtl::icu::utf16_le` for little-endian UTF-16 encoded inputs,
-* in namespace `tao::pegtl::icu::utf32_be` for big-endian UTF-32 encoded inputs, and
-* in namespace `tao::pegtl::icu::utf32_le` for little-endian UTF-32 encoded inputs.
+* in namespace `tao::pegtl::utf8::icu` for UTF-8 encoded inputs,
+* in namespace `tao::pegtl::utf16_be::icu` for big-endian UTF-16 encoded inputs,
+* in namespace `tao::pegtl::utf16_le::icu` for little-endian UTF-16 encoded inputs,
+* in namespace `tao::pegtl::utf32_be::icu` for big-endian UTF-32 encoded inputs, and
+* in namespace `tao::pegtl::utf32_le::icu` for little-endian UTF-32 encoded inputs.
+
+And, for convenience, they again appear in multiple namespace aliases,
+
+* namespace alias `tao::pegtl::utf16::icu` for native-endian UTF-16 encoded inputs,
+* namespace alias `tao::pegtl::utf32::icu` for native-endian UTF-32 encoded inputs.
 
 To use these rules it is necessary to provide an include path to the ICU library, to link the application against `libicu`, and to manually include one or more of the following header files:
 
@@ -692,199 +981,199 @@ Convenience wrappers for binary properties.
 
 ###### `alphabetic`
 
-* Equivalent to `binary_property< UCHAR_ALPHABETIC >`.
+* [Equivalent] to `binary_property< UCHAR_ALPHABETIC >`.
 
 ###### `ascii_hex_digit`
 
-* Equivalent to `binary_property< UCHAR_ASCII_HEX_DIGIT >`.
+* [Equivalent] to `binary_property< UCHAR_ASCII_HEX_DIGIT >`.
 
 ###### `bidi_control`
 
-* Equivalent to `binary_property< UCHAR_BIDI_CONTROL >`.
+* [Equivalent] to `binary_property< UCHAR_BIDI_CONTROL >`.
 
 ###### `bidi_mirrored`
 
-* Equivalent to `binary_property< UCHAR_BIDI_MIRRORED >`.
+* [Equivalent] to `binary_property< UCHAR_BIDI_MIRRORED >`.
 
 ###### `case_sensitive`
 
-* Equivalent to `binary_property< UCHAR_CASE_SENSITIVE >`.
+* [Equivalent] to `binary_property< UCHAR_CASE_SENSITIVE >`.
 
 ###### `dash`
 
-* Equivalent to `binary_property< UCHAR_DASH >`.
+* [Equivalent] to `binary_property< UCHAR_DASH >`.
 
 ###### `default_ignorable_code_point`
 
-* Equivalent to `binary_property< UCHAR_DEFAULT_IGNORABLE_CODE_POINT >`.
+* [Equivalent] to `binary_property< UCHAR_DEFAULT_IGNORABLE_CODE_POINT >`.
 
 ###### `deprecated`
 
-* Equivalent to `binary_property< UCHAR_DEPRECATED >`.
+* [Equivalent] to `binary_property< UCHAR_DEPRECATED >`.
 
 ###### `diacritic`
 
-* Equivalent to `binary_property< UCHAR_DIACRITIC >`.
+* [Equivalent] to `binary_property< UCHAR_DIACRITIC >`.
 
 ###### `extender`
 
-* Equivalent to `binary_property< UCHAR_EXTENDER >`.
+* [Equivalent] to `binary_property< UCHAR_EXTENDER >`.
 
 ###### `full_composition_exclusion`
 
-* Equivalent to `binary_property< UCHAR_FULL_COMPOSITION_EXCLUSION >`.
+* [Equivalent] to `binary_property< UCHAR_FULL_COMPOSITION_EXCLUSION >`.
 
 ###### `grapheme_base`
 
-* Equivalent to `binary_property< UCHAR_GRAPHEME_BASE >`.
+* [Equivalent] to `binary_property< UCHAR_GRAPHEME_BASE >`.
 
 ###### `grapheme_extend`
 
-* Equivalent to `binary_property< UCHAR_GRAPHEME_EXTEND >`.
+* [Equivalent] to `binary_property< UCHAR_GRAPHEME_EXTEND >`.
 
 ###### `grapheme_link`
 
-* Equivalent to `binary_property< UCHAR_GRAPHEME_LINK >`.
+* [Equivalent] to `binary_property< UCHAR_GRAPHEME_LINK >`.
 
 ###### `hex_digit`
 
-* Equivalent to `binary_property< UCHAR_HEX_DIGIT >`.
+* [Equivalent] to `binary_property< UCHAR_HEX_DIGIT >`.
 
 ###### `hyphen`
 
-* Equivalent to `binary_property< UCHAR_HYPHEN >`.
+* [Equivalent] to `binary_property< UCHAR_HYPHEN >`.
 
 ###### `id_continue`
 
-* Equivalent to `binary_property< UCHAR_ID_CONTINUE >`.
+* [Equivalent] to `binary_property< UCHAR_ID_CONTINUE >`.
 
 ###### `id_start`
 
-* Equivalent to `binary_property< UCHAR_ID_START >`.
+* [Equivalent] to `binary_property< UCHAR_ID_START >`.
 
 ###### `ideographic`
 
-* Equivalent to `binary_property< UCHAR_IDEOGRAPHIC >`.
+* [Equivalent] to `binary_property< UCHAR_IDEOGRAPHIC >`.
 
 ###### `ids_binary_operator`
 
-* Equivalent to `binary_property< UCHAR_IDS_BINARY_OPERATOR >`.
+* [Equivalent] to `binary_property< UCHAR_IDS_BINARY_OPERATOR >`.
 
 ###### `ids_trinary_operator`
 
-* Equivalent to `binary_property< UCHAR_IDS_TRINARY_OPERATOR >`.
+* [Equivalent] to `binary_property< UCHAR_IDS_TRINARY_OPERATOR >`.
 
 ###### `join_control`
 
-* Equivalent to `binary_property< UCHAR_JOIN_CONTROL >`.
+* [Equivalent] to `binary_property< UCHAR_JOIN_CONTROL >`.
 
 ###### `logical_order_exception`
 
-* Equivalent to `binary_property< UCHAR_LOGICAL_ORDER_EXCEPTION >`.
+* [Equivalent] to `binary_property< UCHAR_LOGICAL_ORDER_EXCEPTION >`.
 
 ###### `lowercase`
 
-* Equivalent to `binary_property< UCHAR_LOWERCASE >`.
+* [Equivalent] to `binary_property< UCHAR_LOWERCASE >`.
 
 ###### `math`
 
-* Equivalent to `binary_property< UCHAR_MATH >`.
+* [Equivalent] to `binary_property< UCHAR_MATH >`.
 
 ###### `nfc_inert`
 
-* Equivalent to `binary_property< UCHAR_NFC_INERT >`.
+* [Equivalent] to `binary_property< UCHAR_NFC_INERT >`.
 
 ###### `nfd_inert`
 
-* Equivalent to `binary_property< UCHAR_NFD_INERT >`.
+* [Equivalent] to `binary_property< UCHAR_NFD_INERT >`.
 
 ###### `nfkc_inert`
 
-* Equivalent to `binary_property< UCHAR_NFKC_INERT >`.
+* [Equivalent] to `binary_property< UCHAR_NFKC_INERT >`.
 
 ###### `nfkd_inert`
 
-* Equivalent to `binary_property< UCHAR_NFKD_INERT >`.
+* [Equivalent] to `binary_property< UCHAR_NFKD_INERT >`.
 
 ###### `noncharacter_code_point`
 
-* Equivalent to `binary_property< UCHAR_NONCHARACTER_CODE_POINT >`.
+* [Equivalent] to `binary_property< UCHAR_NONCHARACTER_CODE_POINT >`.
 
 ###### `pattern_syntax`
 
-* Equivalent to `binary_property< UCHAR_PATTERN_SYNTAX >`.
+* [Equivalent] to `binary_property< UCHAR_PATTERN_SYNTAX >`.
 
 ###### `pattern_white_space`
 
-* Equivalent to `binary_property< UCHAR_PATTERN_WHITE_SPACE >`.
+* [Equivalent] to `binary_property< UCHAR_PATTERN_WHITE_SPACE >`.
 
 ###### `posix_alnum`
 
-* Equivalent to `binary_property< UCHAR_POSIX_ALNUM >`.
+* [Equivalent] to `binary_property< UCHAR_POSIX_ALNUM >`.
 
 ###### `posix_blank`
 
-* Equivalent to `binary_property< UCHAR_POSIX_BLANK >`.
+* [Equivalent] to `binary_property< UCHAR_POSIX_BLANK >`.
 
 ###### `posix_graph`
 
-* Equivalent to `binary_property< UCHAR_POSIX_GRAPH >`.
+* [Equivalent] to `binary_property< UCHAR_POSIX_GRAPH >`.
 
 ###### `posix_print`
 
-* Equivalent to `binary_property< UCHAR_POSIX_PRINT >`.
+* [Equivalent] to `binary_property< UCHAR_POSIX_PRINT >`.
 
 ###### `posix_xdigit`
 
-* Equivalent to `binary_property< UCHAR_POSIX_XDIGIT >`.
+* [Equivalent] to `binary_property< UCHAR_POSIX_XDIGIT >`.
 
 ###### `quotation_mark`
 
-* Equivalent to `binary_property< UCHAR_QUOTATION_MARK >`.
+* [Equivalent] to `binary_property< UCHAR_QUOTATION_MARK >`.
 
 ###### `radical`
 
-* Equivalent to `binary_property< UCHAR_RADICAL >`.
+* [Equivalent] to `binary_property< UCHAR_RADICAL >`.
 
 ###### `s_term`
 
-* Equivalent to `binary_property< UCHAR_S_TERM >`.
+* [Equivalent] to `binary_property< UCHAR_S_TERM >`.
 
 ###### `segment_starter`
 
-* Equivalent to `binary_property< UCHAR_SEGMENT_STARTER >`.
+* [Equivalent] to `binary_property< UCHAR_SEGMENT_STARTER >`.
 
 ###### `soft_dotted`
 
-* Equivalent to `binary_property< UCHAR_SOFT_DOTTED >`.
+* [Equivalent] to `binary_property< UCHAR_SOFT_DOTTED >`.
 
 ###### `terminal_punctuation`
 
-* Equivalent to `binary_property< UCHAR_TERMINAL_PUNCTUATION >`.
+* [Equivalent] to `binary_property< UCHAR_TERMINAL_PUNCTUATION >`.
 
 ###### `unified_ideograph`
 
-* Equivalent to `binary_property< UCHAR_UNIFIED_IDEOGRAPH >`.
+* [Equivalent] to `binary_property< UCHAR_UNIFIED_IDEOGRAPH >`.
 
 ###### `uppercase`
 
-* Equivalent to `binary_property< UCHAR_UPPERCASE >`.
+* [Equivalent] to `binary_property< UCHAR_UPPERCASE >`.
 
 ###### `variation_selector`
 
-* Equivalent to `binary_property< UCHAR_VARIATION_SELECTOR >`.
+* [Equivalent] to `binary_property< UCHAR_VARIATION_SELECTOR >`.
 
 ###### `white_space`
 
-* Equivalent to `binary_property< UCHAR_WHITE_SPACE >`.
+* [Equivalent] to `binary_property< UCHAR_WHITE_SPACE >`.
 
 ###### `xid_continue`
 
-* Equivalent to `binary_property< UCHAR_XID_CONTINUE >`.
+* [Equivalent] to `binary_property< UCHAR_XID_CONTINUE >`.
 
 ###### `xid_start`
 
-* Equivalent to `binary_property< UCHAR_XID_START >`.
+* [Equivalent] to `binary_property< UCHAR_XID_START >`.
 
 ### ICU Rules for Enumerated Properties
 
@@ -893,67 +1182,67 @@ Convenience wrappers for enumerated properties.
 ###### `bidi_class< V >`
 
 * `V` is of type `UCharDirection`.
-* Equivalent to `property_value< UCHAR_BIDI_CLASS, V >`.
+* [Equivalent] to `property_value< UCHAR_BIDI_CLASS, V >`.
 
 ###### `block< V >`
 
 * `V` is of type `UBlockCode`.
-* Equivalent to `property_value< UCHAR_BLOCK, V >`.
+* [Equivalent] to `property_value< UCHAR_BLOCK, V >`.
 
 ###### `decomposition_type< V >`
 
 * `V` is of type `UDecompositionType`.
-* Equivalent to `property_value< UCHAR_DECOMPOSITION_TYPE, V >`.
+* [Equivalent] to `property_value< UCHAR_DECOMPOSITION_TYPE, V >`.
 
 ###### `east_asian_width< V >`
 
 * `V` is of type `UEastAsianWidth`.
-* Equivalent to `property_value< UCHAR_EAST_ASIAN_WIDTH, V >`.
+* [Equivalent] to `property_value< UCHAR_EAST_ASIAN_WIDTH, V >`.
 
 ###### `general_category< V >`
 
 * `V` is of type `UCharCategory`.
-* Equivalent to `property_value< UCHAR_GENERAL_CATEGORY, V >`.
+* [Equivalent] to `property_value< UCHAR_GENERAL_CATEGORY, V >`.
 
 ###### `grapheme_cluster_break< V >`
 
 * `V` is of type `UGraphemeClusterBreak`.
-* Equivalent to `property_value< UCHAR_GRAPHEME_CLUSTER_BREAK, V >`.
+* [Equivalent] to `property_value< UCHAR_GRAPHEME_CLUSTER_BREAK, V >`.
 
 ###### `hangul_syllable_type< V >`
 
 * `V` is of type `UHangulSyllableType`.
-* Equivalent to `property_value< UCHAR_HANGUL_SYLLABLE_TYPE, V >`.
+* [Equivalent] to `property_value< UCHAR_HANGUL_SYLLABLE_TYPE, V >`.
 
 ###### `joining_group< V >`
 
 * `V` is of type `UJoiningGroup`.
-* Equivalent to `property_value< UCHAR_JOINING_GROUP, V >`.
+* [Equivalent] to `property_value< UCHAR_JOINING_GROUP, V >`.
 
 ###### `joining_type< V >`
 
 * `V` is of type `UJoiningType`.
-* Equivalent to `property_value< UCHAR_JOINING_TYPE, V >`.
+* [Equivalent] to `property_value< UCHAR_JOINING_TYPE, V >`.
 
 ###### `line_break< V >`
 
 * `V` is of type `ULineBreak`.
-* Equivalent to `property_value< UCHAR_LINE_BREAK, V >`.
+* [Equivalent] to `property_value< UCHAR_LINE_BREAK, V >`.
 
 ###### `numeric_type< V >`
 
 * `V` is of type `UNumericType`.
-* Equivalent to `property_value< UCHAR_NUMERIC_TYPE, V >`.
+* [Equivalent] to `property_value< UCHAR_NUMERIC_TYPE, V >`.
 
 ###### `sentence_break< V >`
 
 * `V` is of type `USentenceBreak`.
-* Equivalent to `property_value< UCHAR_SENTENCE_BREAK, V >`.
+* [Equivalent] to `property_value< UCHAR_SENTENCE_BREAK, V >`.
 
 ###### `word_break< V >`
 
 * `V` is of type `UWordBreakValues`.
-* Equivalent to `property_value< UCHAR_WORD_BREAK, V >`.
+* [Equivalent] to `property_value< UCHAR_WORD_BREAK, V >`.
 
 ### ICU Rules for Value Properties
 
@@ -962,17 +1251,17 @@ Convenience wrappers for enumerated properties that return a value instead of an
 ###### `canonical_combining_class< V >`
 
 * `V` is of type `std::uint8_t`.
-* Equivalent to `property_value< UCHAR_CANONICAL_COMBINING_CLASS, V >`.
+* [Equivalent] to `property_value< UCHAR_CANONICAL_COMBINING_CLASS, V >`.
 
 ###### `lead_canonical_combining_class< V >`
 
 * `V` is of type `std::uint8_t`.
-* Equivalent to `property_value< UCHAR_LEAD_CANONICAL_COMBINING_CLASS, V >`.
+* [Equivalent] to `property_value< UCHAR_LEAD_CANONICAL_COMBINING_CLASS, V >`.
 
 ###### `trail_canonical_combining_class< V >`
 
 * `V` is of type `std::uint8_t`.
-* Equivalent to `property_value< UCHAR_TRAIL_CANONICAL_COMBINING_CLASS, V >`.
+* [Equivalent] to `property_value< UCHAR_TRAIL_CANONICAL_COMBINING_CLASS, V >`.
 
 ## Binary Rules
 
@@ -986,10 +1275,14 @@ These rules are available in multiple versions,
 * in namespace `tao::pegtl::uint64_be` for big-endian 64-bit integer values, and
 * in namespace `tao::pegtl::uint64_le` for little-endian 64-bit integer values.
 
-These rules read one or more bytes from the input to form (and match) an 8, 16, 32 or 64-bit value, respectively, and template parameters are given as matching `std::uint8_t`, `std::uint16_t`, `std::uint32_t` or `std::uin64_t`.
+The binary rules need to be manually included from their corresponding headers in the `contrib` section.
 
-In the following descriptions the parameter N is the size of a single value in bytes, i.e. either 1, 2, 4 or 8.
+These rules read one or more bytes from the input to form (and match) an 8, 16, 32 or 64-bit value, respectively, and corresponding template parameters are given as either `std::uint8_t`, `std::uint16_t`, `std::uint32_t` or `std::uin64_t`.
+
+In the following descriptions, the parameter N is the size of a single value in bytes, i.e. either 1, 2, 4 or 8.
 The term *input value* indicates a correspondingly sized integer value read from successive bytes of the input.
+
+Binary rules do not rely on other rules.
 
 ###### `any`
 
@@ -1022,15 +1315,15 @@ The term *input value* indicates a correspondingly sized integer value read from
 
 ###### `mask_ranges< M, C1, D1, C2, D2, ... >`
 
-* Equivalent to `sor< mask_range< M, C1, D1 >, mask_range< M, C2, D2 >, ... >`.
+* [Equivalent] to `sor< mask_range< M, C1, D1 >, mask_range< M, C2, D2 >, ... >`.
 
 ###### `mask_ranges< M, C1, D1, C2, D2, ..., E >`
 
-* Equivalent to `sor< mask_range< M, C1, D1 >, mask_range< M, C2, D2 >, ..., mask_one< M, E > >`.
+* [Equivalent] to `sor< mask_range< M, C1, D1 >, mask_range< M, C2, D2 >, ..., mask_one< M, E > >`.
 
 ###### `mask_string< M, C... >`
 
-* Equivalent to `seq< mask_one< M, C >... >`.
+* [Equivalent] to `seq< mask_one< M, C >... >`.
 
 ###### `not_one< C... >`
 
@@ -1058,15 +1351,15 @@ The term *input value* indicates a correspondingly sized integer value read from
 
 ###### `ranges< C1, D1, C2, D2, ... >`
 
-* Equivalent to `sor< range< C1, D1 >, range< C2, D2 >, ... >`.
+* [Equivalent] to `sor< range< C1, D1 >, range< C2, D2 >, ... >`.
 
 ###### `ranges< C1, D1, C2, D2, ..., E >`
 
-* Equivalent to `sor< range< C1, D1 >, range< C2, D2 >, ..., one< E > >`.
+* [Equivalent] to `sor< range< C1, D1 >, range< C2, D2 >, ..., one< E > >`.
 
 ###### `string< C... >`
 
-* Equivalent to `seq< one< C >... >`.
+* [Equivalent] to `seq< one< C >... >`.
 
 ## Full Index
 
@@ -1106,8 +1399,8 @@ The term *input value* indicates a correspondingly sized integer value read from
 * [`east_asian_width< V >`](#east_asian_width-v-) <sup>[(icu rules)](#icu-rules-for-enumerated-properties)</sup>
 * [`enable< R... >`](#enable-r-) <sup>[(meta-rules)](#meta-rules)</sup>
 * [`eof`](#eof) <sup>[(atomic rules)](#atomic-rules)</sup>
-* [`eol`](#eol) <sup>[(ascii rules)](#ascii-rules)</sup>
-* [`eolf`](#eolf) <sup>[(ascii rules)](#ascii-rules)</sup>
+* [`eol`](#eol) <sup>[(atomic rules)](#atomic-rules)</sup>
+* [`eolf`](#eolf) <sup>[(atomic rules)](#atomic-rules)</sup>
 * [`extender`](#extender) <sup>[(icu rules)](#icu-rules-for-binary-properties)</sup>
 * [`failure`](#failure) <sup>[(atomic rules)](#atomic-rules)</sup>
 * [`forty_two< C... >`](#forty_two-c-) <sup>[(ascii rules)](#ascii-rules)</sup>
@@ -1245,4 +1538,8 @@ The term *input value* indicates a correspondingly sized integer value read from
 * [`xid_continue`](#xid_continue) <sup>[(icu rules)](#icu-rules-for-binary-properties)</sup>
 * [`xid_start`](#xid_start) <sup>[(icu rules)](#icu-rules-for-binary-properties)</sup>
 
-Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
+
+[Equivalent]: #equivalence
+[implementation]: #implementation
+[Meta data]: Meta-Data-and-Visit.md

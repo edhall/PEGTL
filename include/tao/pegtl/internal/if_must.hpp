@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_IF_MUST_HPP
@@ -6,21 +6,20 @@
 
 #include "../config.hpp"
 
+#include "enable_control.hpp"
 #include "must.hpp"
-#include "skip_control.hpp"
-#include "trivial.hpp"
 
 #include "../apply_mode.hpp"
 #include "../rewind_mode.hpp"
-
-#include "../analysis/counted.hpp"
+#include "../type_list.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
    template< bool Default, typename Cond, typename... Rules >
    struct if_must
    {
-      using analyze_t = analysis::counted< analysis::rule_type::seq, Default ? 0 : 1, Cond, must< Rules... > >;
+      using rule_t = if_must;
+      using subs_t = type_list< Cond, must< Rules... > >;
 
       template< apply_mode A,
                 rewind_mode M,
@@ -28,12 +27,12 @@ namespace TAO_PEGTL_NAMESPACE::internal
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      [[nodiscard]] static bool match( Input& in, States&&... st )
+      [[nodiscard]] static bool match( ParseInput& in, States&&... st )
       {
          if( Control< Cond >::template match< A, M, Action, Control >( in, st... ) ) {
-            (void)( Control< must< Rules > >::template match< A, M, Action, Control >( in, st... ) && ... );
+            (void)Control< must< Rules... > >::template match< A, M, Action, Control >( in, st... );
             return true;
          }
          return Default;
@@ -41,7 +40,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    };
 
    template< bool Default, typename Cond, typename... Rules >
-   inline constexpr bool skip_control< if_must< Default, Cond, Rules... > > = true;
+   inline constexpr bool enable_control< if_must< Default, Cond, Rules... > > = false;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

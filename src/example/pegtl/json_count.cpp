@@ -1,20 +1,60 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
+#include <cstddef>
 #include <iomanip>
 #include <iostream>
-
-#define TAO_PEGTL_PRETTY_DEMANGLE
+#include <map>
+#include <string_view>
 
 #include <tao/pegtl.hpp>
-#include <tao/pegtl/contrib/counter.hpp>
-#include <tao/pegtl/contrib/json.hpp>
-#include <tao/pegtl/file_input.hpp>
 
-using namespace TAO_PEGTL_NAMESPACE;  // NOLINT
+#include <tao/pegtl/contrib/json.hpp>
+
+namespace TAO_PEGTL_NAMESPACE
+{
+   struct counter_data
+   {
+      std::size_t start = 0;
+      std::size_t success = 0;
+      std::size_t failure = 0;
+   };
+
+   struct counter_state
+   {
+      std::map< std::string_view, counter_data > counts;
+   };
+
+   template< typename Rule >
+   struct counter
+      : normal< Rule >
+   {
+      template< typename Input >
+      static void start( const Input& /*unused*/, counter_state& ts )
+      {
+         ++ts.counts[ demangle< Rule >() ].start;
+      }
+
+      template< typename Input >
+      static void success( const Input& /*unused*/, counter_state& ts )
+      {
+         ++ts.counts[ demangle< Rule >() ].success;
+      }
+
+      template< typename Input >
+      static void failure( const Input& /*unused*/, counter_state& ts )
+      {
+         ++ts.counts[ demangle< Rule >() ].failure;
+      }
+   };
+
+}  // namespace TAO_PEGTL_NAMESPACE
+
+using namespace TAO_PEGTL_NAMESPACE;
+
 using grammar = must< json::text, eof >;
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    counter_state cs;
 

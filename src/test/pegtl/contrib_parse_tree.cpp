@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
@@ -18,8 +18,7 @@ namespace TAO_PEGTL_NAMESPACE
    template< typename Rule >
    struct selector
       : parse_tree::selector< Rule, parse_tree::store_content::on< A, B, C, D > >
-   {
-   };
+   {};
 
    void unit_test()
    {
@@ -31,11 +30,7 @@ namespace TAO_PEGTL_NAMESPACE
 
       const auto& d = r->children.front();
       TAO_PEGTL_TEST_ASSERT( !d->is_root() );
-      TAO_PEGTL_TEST_ASSERT( d->id == typeid( D ) );
-      TAO_PEGTL_TEST_ASSERT( d->is< D >() );
-#if !defined( _MSC_VER )
-      TAO_PEGTL_TEST_ASSERT( d->name() == "tao::pegtl::D" );
-#endif
+      TAO_PEGTL_TEST_ASSERT( d->is_type< D >() );
 
       TAO_PEGTL_TEST_ASSERT( d->has_content() );
       TAO_PEGTL_TEST_ASSERT( d->begin().byte == 0 );
@@ -43,8 +38,8 @@ namespace TAO_PEGTL_NAMESPACE
       TAO_PEGTL_TEST_ASSERT( d->string_view() == "ac" );
 
       TAO_PEGTL_TEST_ASSERT( d->children.size() == 2 );
-      TAO_PEGTL_TEST_ASSERT( d->children.front()->is< A >() );
-      TAO_PEGTL_TEST_ASSERT( d->children.back()->is< C >() );
+      TAO_PEGTL_TEST_ASSERT( d->children.front()->is_type< A >() );
+      TAO_PEGTL_TEST_ASSERT( d->children.back()->is_type< C >() );
 
       memory_input in2( "x", "input" );
       const auto r2 = parse_tree::parse< D, selector >( in2 );

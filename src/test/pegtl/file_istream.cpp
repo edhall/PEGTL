@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cerrno>
@@ -8,13 +8,13 @@
 
 namespace TAO_PEGTL_NAMESPACE
 {
-   struct file_content : seq< TAO_PEGTL_STRING( "dummy content" ), eol, discard >
-   {
-   };
+   struct file_content
+      : seq< TAO_PEGTL_STRING( "dummy content" ), eol, discard >
+   {};
 
-   struct file_grammar : seq< rep_min_max< 11, 11, file_content >, eof >
-   {
-   };
+   struct file_grammar
+      : seq< rep_min_max< 11, 11, file_content >, eof >
+   {};
 
    void unit_test()
    {

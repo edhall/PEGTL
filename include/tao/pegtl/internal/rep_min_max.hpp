@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_REP_MIN_MAX_HPP
@@ -8,39 +8,41 @@
 
 #include "../config.hpp"
 
-#include "duseltronik.hpp"
+#include "enable_control.hpp"
+#include "failure.hpp"
 #include "not_at.hpp"
 #include "seq.hpp"
-#include "skip_control.hpp"
-#include "trivial.hpp"
 
 #include "../apply_mode.hpp"
 #include "../rewind_mode.hpp"
-
-#include "../analysis/counted.hpp"
+#include "../type_list.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
    template< unsigned Min, unsigned Max, typename... Rules >
-   struct rep_min_max;
-
-   template< unsigned Min, unsigned Max >
-   struct rep_min_max< Min, Max >
-      : trivial< false >
+   struct rep_min_max
+      : rep_min_max< Min, Max, seq< Rules... > >
    {
       static_assert( Min <= Max );
    };
 
-   template< typename Rule, typename... Rules >
-   struct rep_min_max< 0, 0, Rule, Rules... >
-      : not_at< Rule, Rules... >
+   template< unsigned Min, unsigned Max >
+   struct rep_min_max< Min, Max >
+      : failure
    {
+      static_assert( Min <= Max );
    };
 
-   template< unsigned Min, unsigned Max, typename... Rules >
-   struct rep_min_max
+   template< typename Rule >
+   struct rep_min_max< 0, 0, Rule >
+      : not_at< Rule >
+   {};
+
+   template< unsigned Min, unsigned Max, typename Rule >
+   struct rep_min_max< Min, Max, Rule >
    {
-      using analyze_t = analysis::counted< analysis::rule_type::seq, Min, Rules... >;
+      using rule_t = rep_min_max;
+      using subs_t = type_list< Rule >;
 
       static_assert( Min <= Max );
 
@@ -50,29 +52,29 @@ namespace TAO_PEGTL_NAMESPACE::internal
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      [[nodiscard]] static bool match( Input& in, States&&... st )
+      [[nodiscard]] static bool match( ParseInput& in, States&&... st )
       {
          auto m = in.template mark< M >();
          using m_t = decltype( m );
 
          for( unsigned i = 0; i != Min; ++i ) {
-            if( !( Control< Rules >::template match< A, m_t::next_rewind_mode, Action, Control >( in, st... ) && ... ) ) {
+            if( !Control< Rule >::template match< A, m_t::next_rewind_mode, Action, Control >( in, st... ) ) {
                return false;
             }
          }
          for( unsigned i = Min; i != Max; ++i ) {
-            if( !duseltronik< seq< Rules... >, A, rewind_mode::required, Action, Control >::match( in, st... ) ) {
+            if( !Control< Rule >::template match< A, rewind_mode::required, Action, Control >( in, st... ) ) {
                return m( true );
             }
          }
-         return m( duseltronik< not_at< Rules... >, A, m_t::next_rewind_mode, Action, Control >::match( in, st... ) );  // NOTE that not_at<> will always rewind.
+         return m( Control< not_at< Rule > >::template match< A, m_t::next_rewind_mode, Action, Control >( in, st... ) );  // NOTE that not_at<> will always rewind.
       }
    };
 
    template< unsigned Min, unsigned Max, typename... Rules >
-   inline constexpr bool skip_control< rep_min_max< Min, Max, Rules... > > = true;
+   inline constexpr bool enable_control< rep_min_max< Min, Max, Rules... > > = false;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

@@ -6,7 +6,6 @@ set(test_sources
   actions_one.cpp
   actions_three.cpp
   actions_two.cpp
-  analyze_cycles.cpp
   argv_input.cpp
   ascii_classes.cpp
   ascii_eol.cpp
@@ -25,8 +24,10 @@ set(test_sources
   change_state.cpp
   change_states.cpp
   contrib_alphabet.cpp
-  contrib_integer.cpp
+  contrib_analyze.cpp
+  contrib_http.cpp
   contrib_if_then.cpp
+  contrib_integer.cpp
   contrib_json.cpp
   contrib_parse_tree.cpp
   contrib_partial_trace.cpp
@@ -39,6 +40,7 @@ set(test_sources
   data_cstring.cpp
   demangle.cpp
   discard_input.cpp
+  error_message.cpp
   file_cstream.cpp
   file_file.cpp
   file_istream.cpp
@@ -58,6 +60,7 @@ set(test_sources
   rule_bytes.cpp
   rule_control.cpp
   rule_disable.cpp
+  rule_discard.cpp
   rule_enable.cpp
   rule_eof.cpp
   rule_failure.cpp
@@ -125,9 +128,9 @@ foreach(testsourcefile ${test_sources})
     target_compile_options(${exename} PRIVATE -pedantic -Wall -Wextra -Wshadow -Werror)
   endif()
   if(ANDROID)
-    add_test(NAME ${exename} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../.. COMMAND ${CMAKE_COMMAND} -DANDROID_NDK=${ANDROID_NDK} "-DTEST_RESOURCES=src/test/pegtl/data;src/test/pegtl/file_data.txt;Makefile" -DTEST_RESOURCES_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../../.. -DUNITTEST=${CMAKE_CURRENT_BINARY_DIR}/${exename} -DTEST_PARAMETER=-all -P ${CMAKE_CURRENT_SOURCE_DIR}/ExecuteOnAndroid.cmake)
+    add_test(NAME ${exename} WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMAND ${CMAKE_COMMAND} "-DANDROID_NDK=${ANDROID_NDK}" "-DTEST_RESOURCES_DIR=${CMAKE_SOURCE_DIR}" "-DTEST_RESOURCES=src/test/pegtl/data;src/test/pegtl/file_data.txt;Makefile" "-DUNITTEST=${exename}" -P ${CMAKE_CURRENT_SOURCE_DIR}/ExecuteOnAndroid.cmake)
   else()
-    add_test(NAME ${exename} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../../.. COMMAND ${exename})
+    add_test(NAME ${exename} WORKING_DIRECTORY ${CMAKE_SOURCE_DIR} COMMAND ${exename})
   endif()
 endforeach(testsourcefile)
 

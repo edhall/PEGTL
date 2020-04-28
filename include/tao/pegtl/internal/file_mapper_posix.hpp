@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_FILE_MAPPER_POSIX_HPP
@@ -20,8 +20,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    public:
       explicit file_mapper( const char* filename )
          : file_mapper( file_opener( filename ) )
-      {
-      }
+      {}
 
       explicit file_mapper( const file_opener& reader )
          : m_size( reader.size() ),
@@ -39,7 +38,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
       ~file_mapper() noexcept
       {
          // Legacy C interface requires pointer-to-mutable but does not write through the pointer.
-         ::munmap( const_cast< char* >( m_data ), m_size );  // NOLINT
+         ::munmap( const_cast< char* >( m_data ), m_size );
       }
 
       void operator=( const file_mapper& ) = delete;

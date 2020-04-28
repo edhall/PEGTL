@@ -1,22 +1,22 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
+
+#include "verify_meta.hpp"
 #include "verify_seqs.hpp"
 
 namespace TAO_PEGTL_NAMESPACE
 {
    struct test_state_state
    {
-      template< typename Input >
-      explicit test_state_state( const Input& /*unused*/ )
-      {
-      }
+      template< typename ParseInput >
+      explicit test_state_state( const ParseInput& /*unused*/ )
+      {}
 
-      template< typename Input >
-      void success( const Input& /*unused*/ ) const
-      {
-      }
+      template< typename ParseInput >
+      void success( const ParseInput& /*unused*/ ) const
+      {}
    };
 
    template< typename... Rules >
@@ -24,6 +24,10 @@ namespace TAO_PEGTL_NAMESPACE
 
    void unit_test()
    {
+      verify_meta< state< test_state_state >, internal::success >();
+      verify_meta< state< test_state_state, any >, internal::state< test_state_state, any >, any >();
+      verify_meta< state< test_state_state, alpha, digit >, internal::state< test_state_state, internal::seq< alpha, digit > >, internal::seq< alpha, digit > >();
+
       verify_seqs< test_state_rule >();
    }
 

@@ -10,8 +10,6 @@ It provides the basic infrastructure to build a parse tree that
   * but can also be used with a custom tree node class that adheres to certain rules;
 * and supports on-the-fly tree transformations; some of the more common ones are included.
 
-> The parse tree / AST part of the PEGTL is currently in active development and serves as a prove-of-concept, expect changes at any time. Try it out, experiment with it, and most importantly let us know what you think of it. We need **your** feedback!
-
 ## Content
 
 * [Full Parse Tree](#full-parse-tree)
@@ -34,7 +32,7 @@ auto root = tao::pegtl::parse_tree::parse< my_grammar >( in );
 The result is a `std::unique_ptr< tao::pegtl::parse_tree::node >`.
 The pointer is empty when the input did not match the grammar, otherwise it contains the root node of the resulting parse tree.
 
-The tree nodes have a `name()` member function that returns the name of the grammar rule of which it represents a successful match, `begin()` and `end()` member functions to access the position of the matched portion of the input, `string()` and `string_view()` to actually access said matched input, and a vector called `children` with unique pointers to the child nodes.
+The tree nodes have a `type` member that contains the name of the grammar rule of which it represents a successful match, `begin()` and `end()` member functions to access the position of the matched portion of the input, `string()` and `string_view()` to actually access said matched input, and a vector called `children` with unique pointers to the child nodes.
 
 Note that the included tree node class **points** to the matched data, rather than copying it into the node, wherefore the input **must** still be "alive" when accessing the matched data!
 
@@ -154,17 +152,18 @@ struct basic_node
    using children_t = std::vector< std::unique_ptr< node_t > >;
 
    children_t children;
-   std::type_index id;
+   std::string_view type;
    std::string source;
-
-   template< typename U >
-   bool is() const noexcept { return id == typeid( U ); }
 
    bool is_root() const noexcept;
 
-   // precondition from here on: !is_root()
+   template< typename U >
+   bool is_type() const noexcept;
 
-   std::string name() const;
+   template< typename U >
+   void set_type() noexcept;
+
+   // precondition from here on: !is_root()
 
    position begin() const;
    position end() const;
@@ -217,16 +216,16 @@ struct my_node
 
    // All non-root nodes receive a call to start() when
    // a match is attempted for Rule in a parsing run...
-   template< typename Rule, typename Input, typename... States >
-   void start( const Input& in, States&&... st );
+   template< typename Rule, typename ParseInput, typename... States >
+   void start( const ParseInput& in, States&&... st );
 
    // ...and later a call to success() when the match succeeded...
-   template< typename Rule, typename Input, typename... States >
-   void success( const Input& in, States&&... st );
+   template< typename Rule, typename ParseInput, typename... States >
+   void success( const ParseInput& in, States&&... st );
 
    // ...or to failure() when a (local) failure was encountered.
-   template< typename Rule, typename Input, typename... States >
-   void failure( const Input& in, States&&... st );
+   template< typename Rule, typename ParseInput, typename... States >
+   void failure( const ParseInput& in, States&&... st );
 
    // After a call to success(), and the (optional) call to the selector's
    // transform() did not discard a node, it is passed to its parent node
@@ -236,4 +235,4 @@ struct my_node
 };
 ```
 
-Copyright (c) 2018-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2018-2020 Dr. Colin Hirsch and Daniel Frey

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
@@ -9,36 +9,36 @@
 
 namespace TAO_PEGTL_NAMESPACE
 {
-   std::vector< std::pair< std::string, std::string > > applied;  // NOLINT
+   std::vector< std::pair< std::string, std::string > > applied;
 
    namespace test1
    {
-      struct fiz : if_must< at< one< 'a' > >, two< 'a' > >
-      {
-      };
+      struct fiz
+         : if_must< at< one< 'a' > >, two< 'a' > >
+      {};
 
-      struct foo : sor< fiz, one< 'b' > >
-      {
-      };
+      struct foo
+         : sor< fiz, one< 'b' > >
+      {};
 
-      struct bar : until< eof, foo >
-      {
-      };
+      struct bar
+         : until< eof, foo >
+      {};
 
       void test_result()
       {
          TAO_PEGTL_TEST_ASSERT( applied.size() == 10 );
 
-         TAO_PEGTL_TEST_ASSERT( applied[ 0 ].first == internal::demangle< one< 'b' > >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 1 ].first == internal::demangle< foo >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 2 ].first == internal::demangle< at< one< 'a' > > >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 3 ].first == internal::demangle< two< 'a' > >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 4 ].first == internal::demangle< fiz >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 5 ].first == internal::demangle< foo >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 6 ].first == internal::demangle< one< 'b' > >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 7 ].first == internal::demangle< foo >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 8 ].first == internal::demangle< eof >() );
-         TAO_PEGTL_TEST_ASSERT( applied[ 9 ].first == internal::demangle< bar >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 0 ].first == tao::demangle< one< 'b' > >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 1 ].first == tao::demangle< foo >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 2 ].first == tao::demangle< at< one< 'a' > > >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 3 ].first == tao::demangle< two< 'a' > >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 4 ].first == tao::demangle< fiz >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 5 ].first == tao::demangle< foo >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 6 ].first == tao::demangle< one< 'b' > >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 7 ].first == tao::demangle< foo >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 8 ].first == tao::demangle< eof >() );
+         TAO_PEGTL_TEST_ASSERT( applied[ 9 ].first == tao::demangle< bar >() );
 
          TAO_PEGTL_TEST_ASSERT( applied[ 0 ].second == "b" );
          TAO_PEGTL_TEST_ASSERT( applied[ 1 ].second == "b" );
@@ -57,10 +57,10 @@ namespace TAO_PEGTL_NAMESPACE
    template< typename Rule >
    struct test_action
    {
-      template< typename Input >
-      static void apply( const Input& in )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in )
       {
-         applied.emplace_back( internal::demangle< Rule >(), in.string() );
+         applied.emplace_back( tao::demangle< Rule >(), in.string() );
       }
    };
 
@@ -69,7 +69,7 @@ namespace TAO_PEGTL_NAMESPACE
       parse< disable< test1::bar >, test_action >( memory_input( "baab", __FUNCTION__ ) );
       TAO_PEGTL_TEST_ASSERT( applied.size() == 1 );
 
-      TAO_PEGTL_TEST_ASSERT( applied[ 0 ].first == internal::demangle< disable< test1::bar > >() );
+      TAO_PEGTL_TEST_ASSERT( applied[ 0 ].first == tao::demangle< disable< test1::bar > >() );
       TAO_PEGTL_TEST_ASSERT( applied[ 0 ].second == "baab" );
 
       applied.clear();

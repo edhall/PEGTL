@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_ACTION_INPUT_HPP
@@ -16,18 +16,17 @@
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
-   template< typename Input >
+   template< typename ParseInput >
    class action_input
    {
    public:
-      using input_t = Input;
-      using iterator_t = typename Input::iterator_t;
+      using input_t = ParseInput;
+      using iterator_t = typename ParseInput::iterator_t;
 
-      action_input( const iterator_t& in_begin, const Input& in_input ) noexcept
+      action_input( const iterator_t& in_begin, const ParseInput& in_input ) noexcept
          : m_begin( in_begin ),
            m_input( in_input )
-      {
-      }
+      {}
 
       action_input( const action_input& ) = delete;
       action_input( action_input&& ) = delete;
@@ -42,7 +41,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
          return m_begin;
       }
 
-      [[nodiscard]] const Input& input() const noexcept
+      [[nodiscard]] const ParseInput& input() const noexcept
       {
          return m_input;
       }
@@ -52,7 +51,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
          if constexpr( std::is_same_v< iterator_t, const char* > ) {
             return iterator();
          }
-         else {  // NOLINT
+         else {
             return iterator().data;
          }
       }
@@ -74,7 +73,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
 
       [[nodiscard]] std::string string() const
       {
-         return std::string( begin(), end() );
+         return std::string( begin(), size() );
       }
 
       [[nodiscard]] std::string_view string_view() const noexcept
@@ -99,7 +98,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
 
    protected:
       const iterator_t m_begin;
-      const Input& m_input;
+      const ParseInput& m_input;
    };
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal

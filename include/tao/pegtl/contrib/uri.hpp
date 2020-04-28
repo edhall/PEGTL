@@ -1,8 +1,10 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_CONTRIB_URI_HPP
 #define TAO_PEGTL_CONTRIB_URI_HPP
+
+#include <cstdint>
 
 #include "../ascii.hpp"
 #include "../config.hpp"
@@ -10,6 +12,7 @@
 #include "../utf8.hpp"
 
 #include "abnf.hpp"
+#include "integer.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::uri
 {
@@ -25,11 +28,7 @@ namespace TAO_PEGTL_NAMESPACE::uri
    using colon = one< ':' >;
 
    // clang-format off
-   struct dec_octet : sor< one< '0' >,
-                           rep_min_max< 1, 2, abnf::DIGIT >,
-                           seq< one< '1' >, abnf::DIGIT, abnf::DIGIT >,
-                           seq< one< '2' >, range< '0', '4' >, abnf::DIGIT >,
-                           seq< string< '2', '5' >, range< '0', '5' > > > {};
+   struct dec_octet : maximum_rule< std::uint8_t > {};
 
    struct IPv4address : seq< dec_octet, dot, dec_octet, dot, dec_octet, dot, dec_octet > {};
 

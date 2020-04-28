@@ -1,4 +1,4 @@
-// Copyright (c) 2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2019-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
@@ -31,8 +31,8 @@ namespace TAO_PEGTL_NAMESPACE
    {
       int v = 0;
 
-      template< typename Input >
-      explicit S( const Input& /*unused*/, int& c )
+      template< typename ParseInput >
+      explicit S( const ParseInput& /*unused*/, int& c )
       {
          if( c == 5 ) {
             v = 6;
@@ -45,8 +45,8 @@ namespace TAO_PEGTL_NAMESPACE
          }
       }
 
-      template< typename Input >
-      void success( const Input& /*unused*/, int& c )
+      template< typename ParseInput >
+      void success( const ParseInput& /*unused*/, int& c )
       {
          if( v != 3 ) {
             throw std::runtime_error( "fail3" );

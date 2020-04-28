@@ -1,7 +1,7 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
-#ifndef TAO_PEGTL_SRC_TEST_PEGTL_TEST_HPP  // NOLINT
+#ifndef TAO_PEGTL_SRC_TEST_PEGTL_TEST_HPP
 #define TAO_PEGTL_SRC_TEST_PEGTL_TEST_HPP
 
 #include <cstddef>
@@ -11,7 +11,7 @@
 
 namespace TAO_PEGTL_NAMESPACE
 {
-   std::size_t failed = 0;  // NOLINT
+   std::size_t failed = 0;
 
 }  // namespace TAO_PEGTL_NAMESPACE
 
@@ -25,7 +25,7 @@ namespace TAO_PEGTL_NAMESPACE
 #define TAO_PEGTL_TEST_FAILED( MeSSaGe )            \
    do {                                             \
       std::cerr << "pegtl: unit test failed for [ " \
-                << internal::demangle< Rule >()     \
+                << tao::demangle< Rule >()          \
                 << " ] "                            \
                 << TAO_PEGTL_TEST_UNWRAP( MeSSaGe ) \
                 << " in line [ "                    \
@@ -66,33 +66,5 @@ namespace TAO_PEGTL_NAMESPACE
       catch( ... ) {                                \
       }                                             \
    } while( false )
-
-namespace TAO_PEGTL_NAMESPACE
-{
-   template< unsigned Size, apply_mode B, rewind_mode N, typename... Rules >
-   struct test_rule
-   {
-      using analyze_t = typename seq< Rules... >::analyze_t;
-
-      template< apply_mode A,
-                rewind_mode M,
-                template< typename... >
-                class Action,
-                template< typename... >
-                class Control,
-                typename Input,
-                typename... States >
-      static bool match( Input& in, States&&... st )
-      {
-         static_assert( A == B, "unexpected apply mode" );
-         static_assert( M == N, "unexpected rewind mode" );
-
-         TAO_PEGTL_TEST_ASSERT( in.size() == Size );
-
-         return seq< Rules... >::template match< A, M, Action, Control >( in, st... );
-      }
-   };
-
-}  // namespace TAO_PEGTL_NAMESPACE
 
 #endif

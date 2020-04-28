@@ -51,13 +51,6 @@ For all questions and remarks contact us at **taocpp(at)icemx.net**.
 * Changes the state.
 * Ready for production use but might be changed in the future.
 
-###### `<tao/pegtl/contrib/counter.hpp>`
-
-* Control class for obtaining basic statistics from a parsing run, namely how often each rule
-  1. was attempted to match,
-  2. succeeded to match,
-  3. failed to match.
-
 ###### `<tao/pegtl/contrib/disable_action.hpp>`
 
 * Disables actions.
@@ -186,8 +179,7 @@ Extends on `json_parse.cpp` by parsing JSON files into generic JSON data structu
 
 ###### `src/example/pegtl/json_count.cpp`
 
-Shows how to use the included [counter control](#taopegtlcontribcounterhpp), here together with the JSON grammar from `<tao/pegtl/contrib/json.hpp>`.
-Invoked with one or more JSON files as argument, will attempt to parse the files and print the statistics counters to `std::cout`.
+Shows how to use a simple custom control to create some parsing statistics while parsing JSON files.
 
 ###### `src/example/pegtl/lua53_parse.cpp`
 
@@ -206,12 +198,12 @@ The example shows how to choose which rules will produce a parse tree node, whic
 The output is in [DOT](https://en.wikipedia.org/wiki/DOT_(graph_description_language)) format and can be converted into a graph.
 
 ```sh
-$ build/src/example/pegtl/parse_tree "(2*a + 3*b) / (4*n)" | dot -Tpng -o parse_tree.png
+$ build/src/example/pegtl/parse_tree "(2*a + 3*b) / (4*n)" | dot -Tsvg -o parse_tree.svg
 ```
 
-The above will generate a PNG with a graphical representation of the parse tree.
+The above will generate an SVG file with a graphical representation of the parse tree.
 
-![Parse Tree](Parse-Tree.png)
+![Parse Tree](Parse-Tree.svg)
 
 ###### `src/example/pegtl/proto3.cpp`
 
@@ -242,4 +234,4 @@ Uses the building blocks from `<tao/pegtl/contrib/unescape.hpp>` to show how to 
 Shows how to use the included [tracer control](#taopegtlcontribtracerhpp), here together with the URI grammar from `<tao/pegtl/contrib/uri.hpp>`.
 Invoked with one or more URIs as command line arguments will attempt to parse the URIs while printing trace information to `std::cerr`.
 
-Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey

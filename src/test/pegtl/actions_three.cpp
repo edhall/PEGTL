@@ -1,10 +1,32 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
 
 namespace TAO_PEGTL_NAMESPACE
 {
+   template< unsigned Size, apply_mode B, rewind_mode N, typename... Rules >
+   struct test_rule
+   {
+      template< apply_mode A,
+                rewind_mode M,
+                template< typename... >
+                class Action,
+                template< typename... >
+                class Control,
+                typename ParseInput,
+                typename... States >
+      static bool match( ParseInput& in, States&&... st )
+      {
+         static_assert( A == B, "unexpected apply mode" );
+         static_assert( M == N, "unexpected rewind mode" );
+
+         TAO_PEGTL_TEST_ASSERT( in.size() == Size );
+
+         return seq< Rules... >::template match< A, M, Action, Control >( in, st... );
+      }
+   };
+
    namespace test1
    {
       bool apply_result;
@@ -20,8 +42,8 @@ namespace TAO_PEGTL_NAMESPACE
       template<>
       struct apply_bool_action< grammar >
       {
-         template< typename Input >
-         static bool apply( const Input& /*unused*/ )
+         template< typename ActionInput >
+         static bool apply( const ActionInput& /*unused*/ )
          {
             return apply_result;
          }

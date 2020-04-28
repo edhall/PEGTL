@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cstdlib>
@@ -8,7 +8,7 @@
 
 #include <tao/pegtl.hpp>
 
-using namespace TAO_PEGTL_NAMESPACE;  // NOLINT
+using namespace TAO_PEGTL_NAMESPACE;
 
 #include "double.hpp"
 
@@ -33,8 +33,8 @@ namespace sum
    template<>
    struct action< double_::grammar >
    {
-      template< typename Input >
-      static void apply( const Input& in, double& sum )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, double& sum )
       {
          // assume all values will fit into a C++ double
          std::stringstream ss( in.string() );

@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 // This is a small experiment with a grammar that can recover from errors.
@@ -16,7 +16,7 @@
 
 #include <tao/pegtl.hpp>
 
-using namespace TAO_PEGTL_NAMESPACE;  // NOLINT
+using namespace TAO_PEGTL_NAMESPACE;
 
 // clang-format off
 
@@ -52,8 +52,8 @@ struct my_action
 template< typename T >
 struct my_action< skipping< T > >
 {
-   template< typename Input >
-   static void apply( const Input& in, bool& error )
+   template< typename ActionInput >
+   static void apply( const ActionInput& in, bool& error )
    {
       if( !error ) {
          std::cout << in.position() << ": Invalid expression \"" << in.string() << "\"" << std::endl;
@@ -65,11 +65,11 @@ struct my_action< skipping< T > >
 template< typename R >
 struct found
 {
-   template< typename Input >
-   static void apply( const Input& in, bool& error )
+   template< typename ActionInput >
+   static void apply( const ActionInput& in, bool& error )
    {
       if( !error ) {
-         std::cout << in.position() << ": Found " << internal::demangle< R >() << ": \"" << in.string() << "\"" << std::endl;
+         std::cout << in.position() << ": Found " << tao::demangle< R >() << ": \"" << in.string() << "\"" << std::endl;
       }
    }
 };
@@ -88,8 +88,8 @@ template<> struct my_action< expr > : found< expr > {};
 template<>
 struct my_action< recoverable_expr >
 {
-   template< typename Input >
-   static void apply( const Input& /*unused*/, bool& error )
+   template< typename ActionInput >
+   static void apply( const ActionInput& /*unused*/, bool& error )
    {
       error = false;
       std::cout << std::string( 79, '-' ) << std::endl;
@@ -100,11 +100,11 @@ template< typename Rule >
 struct my_control
    : normal< Rule >
 {
-   template< typename Input, typename... States >
-   static void raise( const Input& in, States&&... /*unused*/ )
+   template< typename ParseInput, typename... States >
+   [[noreturn]] static void raise( const ParseInput& in, States&&... st )
    {
-      std::cout << in.position() << ": Parse error matching " << internal::demangle< Rule >() << std::endl;
-      throw parse_error( "parse error matching " + internal::demangle< Rule >(), in );
+      std::cout << in.position() << ": Parse error matching " << tao::demangle< Rule >() << std::endl;
+      normal< Rule >::raise( in, st... );
    }
 };
 

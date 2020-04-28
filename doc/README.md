@@ -5,6 +5,7 @@
 * [Installing and Using](Installing-and-Using.md)
   * [Requirements](Installing-and-Using.md#requirements)
   * [Installation Packages](Installing-and-Using.md#installation-packages)
+  * [Using Conan](Installing-and-Using.md#using-conan)
   * [Using CMake](Installing-and-Using.md#using-cmake)
     * [CMake Installation](Installing-and-Using.md#cmake-installation)
     * [`find_package`](Installing-and-Using.md#find_package)
@@ -45,6 +46,8 @@
   * [Legacy Actions](Actions-and-States.md#legacy-actions)
 * [Errors and Exceptions](Errors-and-Exceptions.md)
   * [Local to Global Failure](Errors-and-Exceptions.md#local-to-global-failure)
+    * [Intrusive Local to Global Failure](Errors-and-Exceptions.md#intrusive-local-to-global-failure)
+    * [Non-Intrusive Local to Global Failure](Errors-and-Exceptions.md#non-intrusive-local-to-global-failure)
   * [Global to Local Failure](Errors-and-Exceptions.md#global-to-local-failure)
   * [Examples for Must Rules](Errors-and-Exceptions.md#examples-for-must-rules)
   * [Custom Exception Messages](Errors-and-Exceptions.md#custom-exception-messages)
@@ -76,7 +79,7 @@
   * [Nested Parsing](Inputs-and-Parsing.md#nested-parsing)
   * [Incremental Input](Inputs-and-Parsing.md#incremental-input)
     * [Buffer Size](Inputs-and-Parsing.md#buffer-size)
-    * [Discard Input](Inputs-and-Parsing.md#discard-input)
+    * [Discard Buffer](Inputs-and-Parsing.md#discard-buffer)
     * [Custom Rules](Inputs-and-Parsing.md#custom-rules)
     * [Custom Readers](Inputs-and-Parsing.md#custom-readers)
     * [Buffer Details](Inputs-and-Parsing.md#buffer-details)
@@ -95,13 +98,15 @@
   * [Transformers](Parse-Tree.md#transformers)
   * [`tao::pegtl::parse_tree::node`](Parse-Tree.md#taopegtlparse_treenode)
   * [Custom Node Class](Parse-Tree.md#custom-node-class)
+* [Meta Data and Visit](Meta-Data-and-Visit.md)
 * [Contrib and Examples](Contrib-and-Examples.md)
   * [Contrib](Contrib-and-Examples.md#contrib)
   * [Examples](Contrib-and-Examples.md#examples)
 * [Grammar Analysis](Grammar-Analysis.md)
-  * [Rule Analysis](Grammar-Analysis.md#rule-analysis)
-  * [Background](Grammar-Analysis.md#background)
-  * [Custom Rules](Grammar-Analysis.md#custom-rules)
+  * [Running](Grammar-Analysis.md#running)
+  * [Example](Grammar-Analysis.md#example)
+  * [Requirements](Grammar-Analysis.md#requirements)
+  * [Limitations](Grammar-Analysis.md#limitations)
 * [Changelog](Changelog.md)
 * [Migration Guide](Migration-Guide.md)
 
@@ -143,8 +148,8 @@
 * [`east_asian_width< V >`](Rule-Reference.md#east_asian_width-v-) <sup>[(icu rules)](Rule-Reference.md#icu-rules-for-enumerated-properties)</sup>
 * [`enable< R... >`](Rule-Reference.md#enable-r-) <sup>[(meta-rules)](Rule-Reference.md#meta-rules)</sup>
 * [`eof`](Rule-Reference.md#eof) <sup>[(atomic rules)](Rule-Reference.md#atomic-rules)</sup>
-* [`eol`](Rule-Reference.md#eol) <sup>[(ascii rules)](Rule-Reference.md#ascii-rules)</sup>
-* [`eolf`](Rule-Reference.md#eolf) <sup>[(ascii rules)](Rule-Reference.md#ascii-rules)</sup>
+* [`eol`](Rule-Reference.md#eol) <sup>[(atomic rules)](Rule-Reference.md#atomic-rules)</sup>
+* [`eolf`](Rule-Reference.md#eolf) <sup>[(atomic rules)](Rule-Reference.md#atomic-rules)</sup>
 * [`extender`](Rule-Reference.md#extender) <sup>[(icu rules)](Rule-Reference.md#icu-rules-for-binary-properties)</sup>
 * [`failure`](Rule-Reference.md#failure) <sup>[(atomic rules)](Rule-Reference.md#atomic-rules)</sup>
 * [`forty_two< C... >`](Rule-Reference.md#forty_two-c-) <sup>[(ascii rules)](Rule-Reference.md#ascii-rules)</sup>
@@ -282,4 +287,4 @@
 * [`xid_continue`](Rule-Reference.md#xid_continue) <sup>[(icu rules)](Rule-Reference.md#icu-rules-for-binary-properties)</sup>
 * [`xid_start`](Rule-Reference.md#xid_start) <sup>[(icu rules)](Rule-Reference.md#icu-rules-for-binary-properties)</sup>
 
-Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_UNTIL_HPP
@@ -7,25 +7,28 @@
 #include "../config.hpp"
 
 #include "bytes.hpp"
+#include "enable_control.hpp"
 #include "eof.hpp"
 #include "not_at.hpp"
-#include "skip_control.hpp"
+#include "seq.hpp"
 #include "star.hpp"
 
 #include "../apply_mode.hpp"
 #include "../rewind_mode.hpp"
-
-#include "../analysis/generic.hpp"
+#include "../type_list.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
    template< typename Cond, typename... Rules >
-   struct until;
+   struct until
+      : until< Cond, seq< Rules... > >
+   {};
 
    template< typename Cond >
    struct until< Cond >
    {
-      using analyze_t = analysis::generic< analysis::rule_type::seq, star< not_at< Cond >, not_at< eof >, bytes< 1 > >, Cond >;
+      using rule_t = until;
+      using subs_t = type_list< Cond >;
 
       template< apply_mode A,
                 rewind_mode M,
@@ -33,9 +36,9 @@ namespace TAO_PEGTL_NAMESPACE::internal
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      [[nodiscard]] static bool match( Input& in, States&&... st )
+      [[nodiscard]] static bool match( ParseInput& in, States&&... st )
       {
          auto m = in.template mark< M >();
 
@@ -49,10 +52,11 @@ namespace TAO_PEGTL_NAMESPACE::internal
       }
    };
 
-   template< typename Cond, typename... Rules >
-   struct until
+   template< typename Cond, typename Rule >
+   struct until< Cond, Rule >
    {
-      using analyze_t = analysis::generic< analysis::rule_type::seq, star< not_at< Cond >, not_at< eof >, Rules... >, Cond >;
+      using rule_t = until;
+      using subs_t = type_list< Cond, Rule >;
 
       template< apply_mode A,
                 rewind_mode M,
@@ -60,15 +64,15 @@ namespace TAO_PEGTL_NAMESPACE::internal
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      [[nodiscard]] static bool match( Input& in, States&&... st )
+      [[nodiscard]] static bool match( ParseInput& in, States&&... st )
       {
          auto m = in.template mark< M >();
          using m_t = decltype( m );
 
          while( !Control< Cond >::template match< A, rewind_mode::required, Action, Control >( in, st... ) ) {
-            if( !( Control< Rules >::template match< A, m_t::next_rewind_mode, Action, Control >( in, st... ) && ... ) ) {
+            if( !Control< Rule >::template match< A, m_t::next_rewind_mode, Action, Control >( in, st... ) ) {
                return false;
             }
          }
@@ -77,7 +81,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    };
 
    template< typename Cond, typename... Rules >
-   inline constexpr bool skip_control< until< Cond, Rules... > > = true;
+   inline constexpr bool enable_control< until< Cond, Rules... > > = false;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

@@ -136,8 +136,8 @@ Rules with the simplified interface are called without the states as arguments.
 ```c++
 struct simple_rule
 {
-   template< typename Input >
-   static bool match( Input& in ) { ... }
+   template< typename ParseInput >
+   static bool match( ParseInput& in ) { ... }
 };
 ```
 
@@ -162,8 +162,8 @@ namespace modulus
       static_assert( M > 1, "Modulus must be greater than 1" );
       static_assert( R < M, "Remainder must be less than modulus" );
 
-      template< typename Input >
-      static bool match( Input& in )
+      template< typename ParseInput >
+      static bool match( ParseInput& in )
       {
          if( ! in.empty() ) {
             if( ( ( *in.begin() ) % M ) == R ) {
@@ -200,16 +200,16 @@ The signature of `match()` in a complex rule takes the following form.
 ```c++
 struct complex_rule
 {
-   // Optional; explained in the section on Grammar Analysis:
-   using analyze_t = ...;
+   using rule_t = complex_rule;
+   using subs_t = tao::pegtl::empty_list;  // Or tao::pegtl::rule_list< sub_rules_of_complex_rule... >.
 
    template< tao::pegtl::apply_mode A,
              tao::pegtl::rewind_mode M,
              template< typename... > class Action,
              template< typename... > class Control,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   static bool match( Input& in, States&&... )
+   static bool match( ParseInput& in, States&&... )
    { ... }
 };
 ```
@@ -238,9 +238,9 @@ struct seq
               rewind_mode M,
               template< typename... > class Action,
               template< typename... > class Control,
-              typename Input,
+              typename ParseInput,
               typename... States >
-    static bool match( Input& in, States&&... st )
+    static bool match( ParseInput& in, States&&... st )
     {
        auto m = in.template mark< M >();
        using m_t = decltype( m );
@@ -286,8 +286,8 @@ The action stores the matched string that corresponds to `"foo"` in a string var
    template<>
    struct action< long_literal_id >
    {
-      template< typename Input >
-      static void apply( const Input& in,
+      template< typename ActionInput >
+      static void apply( const ActionInput& in,
                          std::string& id,
                          const std::string& )
       {
@@ -320,8 +320,8 @@ The custom rule itself
                 tao::pegtl::rewind_mode M,
                 template< typename... > class Action,
                 template< typename... > class Control,
-                typename Input >
-      static bool match( Input& in,
+                typename ParseInput >
+      static bool match( ParseInput& in,
                          const std::string& id,
                          const std::string& )
       {
@@ -351,8 +351,8 @@ In this case the rule `long_literal_body` is redundant, however real-world examp
 
    template<> struct action< long_literal_body >
    {
-      template< typename Input >
-      static void apply( const Input& in,
+      template< typename ActionInput >
+      static void apply( const ActionInput& in,
                          const std::string&,
                          std::string& body )
       {
@@ -394,4 +394,4 @@ long literal id was: "fraggle"
 long literal body was: "[foo["
 ```
 
-Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey

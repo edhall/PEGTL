@@ -11,6 +11,8 @@
 * The compatibility uppercase enumerators were removed, the corresponding lowercase enumerators must be used.
 * The compatibility `peek_byte()` member functions were removed, the `peek_uint8()` member functions must be used.
 * The compatibility header `changes.hpp` was removed, use the action-based `change_*.hpp` headers.
+* The parse tree nodes provide `node->type` (a `std::string_view`) instead of `node->name()`.
+* The parse tree nodes provide `node->string_view()` and `node->string()` instead of `node->content()`.
 
 ## Version 2.8.0
 
@@ -54,4 +56,4 @@ Please contact the authors at `taocpp(at)icemx.net` for any further questions wh
 There were [many important changes](Changelog.md#100) leading up to version 1.0.0.
 Please contact the authors at `taocpp(at)icemx.net` for any further questions when updating the PEGTL.
 
-Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey

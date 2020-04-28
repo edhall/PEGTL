@@ -1,14 +1,15 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
 #include "verify_fail.hpp"
+#include "verify_meta.hpp"
 
 #include <tao/pegtl/contrib/raw_string.hpp>
 
 namespace TAO_PEGTL_NAMESPACE
 {
-   std::string content;  // NOLINT
+   std::string content;
 
    using rstring = raw_string< '[', '=', ']' >;
    using qstring = raw_string< '[', '=', ']', alpha, digit >;
@@ -20,8 +21,8 @@ namespace TAO_PEGTL_NAMESPACE
    template<>
    struct raction< rstring::content >
    {
-      template< typename Input, typename... States >
-      static void apply( const Input& in, const States&... /*unused*/ )
+      template< typename ActionInput, typename... States >
+      static void apply( const ActionInput& in, const States&... /*unused*/ )
       {
          content.assign( in.begin(), in.end() );
       }
@@ -34,8 +35,8 @@ namespace TAO_PEGTL_NAMESPACE
    template<>
    struct qaction< qstring::content >
    {
-      template< typename Input, typename... States >
-      static void apply( const Input& in, const States&... /*unused*/ )
+      template< typename ActionInput, typename... States >
+      static void apply( const ActionInput& in, const States&... /*unused*/ )
       {
          content.assign( in.begin(), in.end() );
       }
@@ -43,16 +44,14 @@ namespace TAO_PEGTL_NAMESPACE
 
    struct rgrammar
       : must< rstring, eof >
-   {
-   };
+   {};
 
    struct qgrammar
       : must< qstring, eof >
-   {
-   };
+   {};
 
    template< typename Rule, template< typename > class Action, unsigned M, unsigned N >
-   void verify_data( const std::size_t line, const char* file, const char ( &m )[ M ], const char ( &n )[ N ] )  // NOLINT
+   void verify_data( const std::size_t line, const char* file, const char ( &m )[ M ], const char ( &n )[ N ] )
    {
       content.clear();
       memory_input in( m, m + M - 1, file, 0, line, 0 );
@@ -70,6 +69,11 @@ namespace TAO_PEGTL_NAMESPACE
 
    void unit_test()
    {
+      verify_analyze< rstring >( __LINE__, __FILE__, true, false );
+      verify_analyze< qstring >( __LINE__, __FILE__, true, false );
+
+      verify_analyze< raw_string< 'a', 'b', 'c', star< star< any > > > >( __LINE__, __FILE__, true, true );
+
       verify_data< rgrammar, raction >( __LINE__, __FILE__, "[[]]", "" );
       verify_data< rgrammar, raction >( __LINE__, __FILE__, "[[foo]]", "foo" );
       verify_data< rgrammar, raction >( __LINE__, __FILE__, "[===[foo]===]", "foo" );

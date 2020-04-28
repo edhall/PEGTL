@@ -12,7 +12,13 @@ set(example_sources
   indent_aware.cpp
   json_build.cpp
   json_count.cpp
+  json_coverage.cpp
   json_parse.cpp
+  json_parse_tree.cpp
+  json_print_debug.cpp
+  json_print_names.cpp
+  json_print_rules.cpp
+  json_trace.cpp
   lua53_parse.cpp
   modulus_match.cpp
   parse_tree.cpp
@@ -24,6 +30,7 @@ set(example_sources
   symbol_table.cpp
   unescape.cpp
   uri.cpp
+  uri_print_rules.cpp
   uri_trace.cpp
 )
 

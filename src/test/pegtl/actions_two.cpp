@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
@@ -11,23 +11,24 @@ namespace TAO_PEGTL_NAMESPACE
       {
          char c;
 
-         template< typename Input >
-         state1( const Input& /*unused*/, std::string& /*unused*/ )
+         template< typename ParseInput >
+         state1( const ParseInput& /*unused*/, std::string& /*unused*/ )
             : c()
-         {
-         }
+         {}
 
-         template< typename Input >
-         void success( const Input& /*unused*/, std::string& s ) const
+         template< typename ParseInput >
+         void success( const ParseInput& /*unused*/, std::string& s ) const
          {
             s += c;
          }
       };
 
-      struct fobble : sor< state< state1, alpha >, digit >
+      struct fobble
+         : sor< state< state1, alpha >, digit >
       {};
 
-      struct fibble : until< eof, fobble >
+      struct fibble
+         : until< eof, fobble >
       {};
 
       template< typename Rule >
@@ -37,8 +38,8 @@ namespace TAO_PEGTL_NAMESPACE
       template<>
       struct action1< alpha >
       {
-         template< typename Input >
-         static void apply( const Input& in, state1& s )
+         template< typename ActionInput >
+         static void apply( const ActionInput& in, state1& s )
          {
             assert( in.size() == 1 );
             s.c = in.begin()[ 0 ];
@@ -97,8 +98,8 @@ namespace TAO_PEGTL_NAMESPACE
       template< typename Rule >
       struct count_action
       {
-         template< typename Input >
-         static void apply( const Input& in )
+         template< typename ActionInput >
+         static void apply( const ActionInput& in )
          {
             TAO_PEGTL_TEST_ASSERT( in.iterator().byte == count_byte );
             TAO_PEGTL_TEST_ASSERT( in.iterator().line == count_line );

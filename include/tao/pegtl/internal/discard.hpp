@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_DISCARD_HPP
@@ -6,18 +6,19 @@
 
 #include "../config.hpp"
 
-#include "skip_control.hpp"
+#include "enable_control.hpp"
 
-#include "../analysis/generic.hpp"
+#include "../type_list.hpp"
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
    struct discard
    {
-      using analyze_t = analysis::generic< analysis::rule_type::opt >;
+      using rule_t = discard;
+      using subs_t = empty_list;
 
-      template< typename Input >
-      [[nodiscard]] static bool match( Input& in ) noexcept
+      template< typename ParseInput >
+      [[nodiscard]] static bool match( ParseInput& in ) noexcept
       {
          static_assert( noexcept( in.discard() ) );
          in.discard();
@@ -26,7 +27,7 @@ namespace TAO_PEGTL_NAMESPACE::internal
    };
 
    template<>
-   inline constexpr bool skip_control< discard > = true;
+   inline constexpr bool enable_control< discard > = false;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

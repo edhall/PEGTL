@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_MMAP_INPUT_HPP
@@ -36,8 +36,7 @@ namespace TAO_PEGTL_NAMESPACE
          explicit mmap_holder( T&& in_filename )
             : filename( std::forward< T >( in_filename ) ),
               data( filename.c_str() )
-         {
-         }
+         {}
 
          mmap_holder( const mmap_holder& ) = delete;
          mmap_holder( mmap_holder&& ) = delete;
@@ -59,8 +58,7 @@ namespace TAO_PEGTL_NAMESPACE
       explicit mmap_input( T&& in_filename )
          : internal::mmap_holder( std::forward< T >( in_filename ) ),
            memory_input< P, Eol, const char* >( data.begin(), data.end(), filename.c_str() )
-      {
-      }
+      {}
 
       mmap_input( const mmap_input& ) = delete;
       mmap_input( mmap_input&& ) = delete;
@@ -72,7 +70,7 @@ namespace TAO_PEGTL_NAMESPACE
    };
 
    template< typename... Ts >
-   explicit mmap_input( Ts&&... )->mmap_input<>;
+   explicit mmap_input( Ts&&... ) -> mmap_input<>;
 
 }  // namespace TAO_PEGTL_NAMESPACE
 

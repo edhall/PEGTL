@@ -1,10 +1,9 @@
-// Copyright (c) 2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2019-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_HAS_MATCH_HPP
 #define TAO_PEGTL_INTERNAL_HAS_MATCH_HPP
 
-#include <type_traits>
 #include <utility>
 
 #include "../apply_mode.hpp"
@@ -21,11 +20,9 @@ namespace TAO_PEGTL_NAMESPACE::internal
              class Action,
              template< typename... >
              class Control,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   struct has_match
-      : std::false_type
-   {};
+   inline constexpr bool has_match = false;
 
    template< typename Rule,
              apply_mode A,
@@ -34,22 +31,9 @@ namespace TAO_PEGTL_NAMESPACE::internal
              class Action,
              template< typename... >
              class Control,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   struct has_match< decltype( (void)Action< Rule >::template match< Rule, A, M, Action, Control >( std::declval< Input& >(), std::declval< States&& >()... ), void() ), Rule, A, M, Action, Control, Input, States... >
-      : std::true_type
-   {};
-
-   template< typename Rule,
-             apply_mode A,
-             rewind_mode M,
-             template< typename... >
-             class Action,
-             template< typename... >
-             class Control,
-             typename Input,
-             typename... States >
-   inline constexpr bool has_match_v = has_match< void, Rule, A, M, Action, Control, Input, States... >::value;
+   inline constexpr bool has_match< decltype( (void)Action< Rule >::template match< Rule, A, M, Action, Control >( std::declval< ParseInput& >(), std::declval< States&& >()... ), bool() ), Rule, A, M, Action, Control, ParseInput, States... > = true;
 
 }  // namespace TAO_PEGTL_NAMESPACE::internal
 

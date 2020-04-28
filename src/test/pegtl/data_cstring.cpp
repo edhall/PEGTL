@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2016-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include "test.hpp"
@@ -16,9 +16,9 @@ namespace TAO_PEGTL_NAMESPACE
       return parse< Rule, Action, Control >( in );
    }
 
-   struct test_grammar : seq< string< 'a', 'b', 'c', 'd', 'e', 'f' >, not_at< any >, eof >
-   {
-   };
+   struct test_grammar
+      : seq< string< 'a', 'b', 'c', 'd', 'e', 'f' >, not_at< any >, eof >
+   {};
 
    void unit_test()
    {

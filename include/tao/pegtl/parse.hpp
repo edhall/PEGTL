@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_PARSE_HPP
@@ -13,8 +13,6 @@
 #include "parse_error.hpp"
 #include "rewind_mode.hpp"
 
-#include "internal/action_input.hpp"
-
 namespace TAO_PEGTL_NAMESPACE
 {
    template< typename Rule,
@@ -22,9 +20,9 @@ namespace TAO_PEGTL_NAMESPACE
              template< typename... > class Control = normal,
              apply_mode A = apply_mode::action,
              rewind_mode M = rewind_mode::required,
-             typename Input,
+             typename ParseInput,
              typename... States >
-   bool parse( Input&& in, States&&... st )
+   bool parse( ParseInput&& in, States&&... st )
    {
       return Control< Rule >::template match< A, M, Action, Control >( in, st... );
    }
@@ -34,10 +32,10 @@ namespace TAO_PEGTL_NAMESPACE
              template< typename... > class Control = normal,
              apply_mode A = apply_mode::action,
              rewind_mode M = rewind_mode::required,
-             typename Outer,
-             typename Input,
+             typename OuterInput,
+             typename ParseInput,
              typename... States >
-   bool parse_nested( const Outer& oi, Input&& in, States&&... st )
+   bool parse_nested( const OuterInput& oi, ParseInput&& in, States&&... st )
    {
       try {
          return parse< Rule, Action, Control, A, M >( in, st... );

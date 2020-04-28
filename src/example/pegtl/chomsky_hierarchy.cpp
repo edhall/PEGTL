@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cassert>
@@ -20,8 +20,7 @@ namespace example
 
    struct type_3
       : pegtl::star< pegtl::one< 'a' >, pegtl::plus< pegtl::one< 'b' > > >
-   {
-   };
+   {};
 
    // Type 2 - Context Free Languages
 
@@ -31,8 +30,7 @@ namespace example
 
    struct type_2_recursive
       : pegtl::sor< pegtl::string< 'a', 'b' >, pegtl::seq< pegtl::one< 'a' >, type_2_recursive, pegtl::one< 'b' > > >
-   {
-   };
+   {};
 
    // Implementation that uses state instead of recursion, an
    // action to set the state, and a custom rule to use it.
@@ -46,9 +44,9 @@ namespace example
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      static bool match( Input& in, std::size_t& count, States&&... /*unused*/ )
+      static bool match( ParseInput& in, std::size_t& count, States&&... /*unused*/ )
       {
          if( in.size( count ) >= count ) {
             for( std::size_t i = 0; i < count; ++i ) {
@@ -65,19 +63,17 @@ namespace example
 
    struct type_2_with_state
       : pegtl::seq< pegtl::star< pegtl::one< 'a' > >, match_n< 'b' > >
-   {
-   };
+   {};
 
    template< typename Rule >
    struct action_2_with_state
-   {
-   };
+   {};
 
    template<>
    struct action_2_with_state< pegtl::star< pegtl::one< 'a' > > >
    {
-      template< typename Input >
-      static void apply( const Input& in, std::size_t& count )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, std::size_t& count )
       {
          count = in.size();
       }
@@ -93,14 +89,12 @@ namespace example
 
    struct type_1
       : pegtl::seq< pegtl::star< pegtl::one< 'a' > >, match_n< 'b' >, match_n< 'c' > >
-   {
-   };
+   {};
 
    template< typename Rule >
    struct action_1
       : action_2_with_state< Rule >
-   {
-   };
+   {};
 
    // Type 0 - Recursively Enumerable Languages
 

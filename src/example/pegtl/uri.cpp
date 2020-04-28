@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <tao/pegtl.hpp>
@@ -27,8 +27,8 @@ namespace uri
    template< std::string URI::*Field >
    struct bind
    {
-      template< typename Input >
-      static void apply( const Input& in, URI& uri )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, URI& uri )
       {
          uri.*Field = in.string();
       }
@@ -53,8 +53,8 @@ namespace uri
    template<>
    struct action< pegtl::uri::opt_userinfo >
    {
-      template< typename Input >
-      static void apply( const Input& in, URI& uri )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, URI& uri )
       {
          if( !in.empty() ) {
             uri.userinfo = std::string( in.begin(), in.size() - 1 );

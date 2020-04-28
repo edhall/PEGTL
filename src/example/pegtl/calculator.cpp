@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2014-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #include <cassert>
@@ -13,7 +13,7 @@
 // Include the analyze function that checks
 // a grammar for possible infinite cycles.
 
-#include <tao/pegtl/analyze.hpp>
+#include <tao/pegtl/contrib/analyze.hpp>
 
 namespace pegtl = TAO_PEGTL_NAMESPACE;
 
@@ -168,7 +168,7 @@ namespace calculator
       void insert( const std::string& name, const order p, const std::function< long( long, long ) >& f )
       {
          assert( !name.empty() );
-         m_ops.emplace( name, op{ p, f } );
+         m_ops.try_emplace( name, op{ p, f } );
       }
 
       [[nodiscard]] const std::map< std::string, op >& ops() const noexcept
@@ -182,7 +182,7 @@ namespace calculator
 
    // Here the actual grammar starts.
 
-   using namespace tao::pegtl;  // NOLINT
+   using namespace tao::pegtl;
 
    // Comments are introduced by a '#' and proceed to the end-of-line/file.
 
@@ -205,7 +205,7 @@ namespace calculator
 
    struct infix
    {
-      using analyze_t = analysis::generic< analysis::rule_type::any >;
+      using rule_t = ascii::any::rule_t;
 
       template< apply_mode,
                 rewind_mode,
@@ -213,9 +213,9 @@ namespace calculator
                 class Action,
                 template< typename... >
                 class Control,
-                typename Input,
+                typename ParseInput,
                 typename... States >
-      static bool match( Input& in, const operators& b, stacks& s, States&&... /*unused*/ )
+      static bool match( ParseInput& in, const operators& b, stacks& s, States&&... /*unused*/ )
       {
          // Look for the longest match of the input against the operators in the operator map.
 
@@ -223,8 +223,8 @@ namespace calculator
       }
 
    private:
-      template< typename Input >
-      static bool match( Input& in, const operators& b, stacks& s, std::string t )
+      template< typename ParseInput >
+      static bool match( ParseInput& in, const operators& b, stacks& s, std::string t )
       {
          if( in.size( t.size() + 1 ) > t.size() ) {
             t += in.peek_char( t.size() );
@@ -299,8 +299,8 @@ namespace calculator
    template<>
    struct action< number >
    {
-      template< typename Input >
-      static void apply( const Input& in, const operators& /*unused*/, stacks& s )
+      template< typename ActionInput >
+      static void apply( const ActionInput& in, const operators& /*unused*/, stacks& s )
       {
          std::stringstream ss( in.string() );
          long v;
@@ -332,7 +332,7 @@ namespace calculator
 
 }  // namespace calculator
 
-int main( int argc, char** argv )
+int main( int argc, char** argv )  // NOLINT(bugprone-exception-escape)
 {
    // Check the grammar for some possible issues.
 

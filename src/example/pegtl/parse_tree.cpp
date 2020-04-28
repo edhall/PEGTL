@@ -1,6 +1,7 @@
-// Copyright (c) 2017-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
+#include <array>
 #include <iostream>
 #include <string>
 #include <type_traits>
@@ -9,7 +10,7 @@
 #include <tao/pegtl/contrib/parse_tree.hpp>
 #include <tao/pegtl/contrib/parse_tree_to_dot.hpp>
 
-using namespace TAO_PEGTL_NAMESPACE;  // NOLINT
+using namespace TAO_PEGTL_NAMESPACE;
 
 namespace example
 {
@@ -55,8 +56,8 @@ namespace example
       // if only one child is left for LHS..., replace the PROD/EXPR with the child directly.
       // otherwise, perform the above transformation, then apply it recursively until LHS...
       // becomes a single child, which then replaces the parent node and the recursion ends.
-      template< typename... States >
-      static void transform( std::unique_ptr< parse_tree::node >& n, States&&... st )
+      template< typename Node, typename... States >
+      static void transform( std::unique_ptr< Node >& n, States&&... st )
       {
          if( n->children.size() == 1 ) {
             n = std::move( n->children.back() );
@@ -93,6 +94,69 @@ namespace example
          product,
          expression > >;
 
+   namespace internal
+   {
+      // a non-thread-safe allocation cache, assuming that the size (sz) is always the same!
+      template< std::size_t N >
+      struct cache
+      {
+         std::size_t pos = 0;
+         std::array< void*, N > data;
+
+         cache() = default;
+
+         cache( const cache& ) = delete;
+         cache( cache&& ) = delete;
+
+         ~cache()
+         {
+            while( pos != 0 ) {
+               ::operator delete( data[ --pos ] );
+            }
+         }
+
+         cache& operator=( const cache& ) = delete;
+         cache& operator=( cache&& ) = delete;
+
+         void* get( std::size_t sz )
+         {
+            if( pos != 0 ) {
+               return data[ --pos ];
+            }
+            return ::operator new( sz );
+         }
+
+         void put( void* p )
+         {
+            if( pos < N ) {
+               data[ pos++ ] = p;
+            }
+            else {
+               ::operator delete( p );
+            }
+         }
+      };
+
+      static cache< 32 > the_cache;
+
+   }  // namespace internal
+
+   // this is not necessary for the example, but serves as a demonstration for an additional optimization.
+   struct node
+      : parse_tree::basic_node< node >
+   {
+      void* operator new( std::size_t sz )
+      {
+         assert( sz == sizeof( node ) );
+         return internal::the_cache.get( sz );
+      }
+
+      void operator delete( void* p )
+      {
+         internal::the_cache.put( p );
+      }
+   };
+
 }  // namespace example
 
 int main( int argc, char** argv )
@@ -105,7 +169,7 @@ int main( int argc, char** argv )
    }
    argv_input in( argv, 1 );
    try {
-      const auto root = parse_tree::parse< example::grammar, example::selector >( in );
+      const auto root = parse_tree::parse< example::grammar, example::node, example::selector >( in );
       parse_tree::print_dot( std::cout, *root );
       return 0;
    }
@@ -118,5 +182,6 @@ int main( int argc, char** argv )
    catch( const std::exception& e ) {
       std::cerr << e.what() << std::endl;
    }
+
    return 1;
 }

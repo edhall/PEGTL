@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2015-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_INTERNAL_BUMP_HELP_HPP
@@ -13,10 +13,10 @@
 
 namespace TAO_PEGTL_NAMESPACE::internal
 {
-   template< result_on_found R, typename Input, typename Char, Char... Cs >
-   void bump_help( Input& in, const std::size_t count ) noexcept
+   template< result_on_found R, typename ParseInput, typename Char, Char... Cs >
+   void bump_help( ParseInput& in, const std::size_t count ) noexcept
    {
-      if constexpr( ( ( Cs != Input::eol_t::ch ) && ... ) != bool( R ) ) {
+      if constexpr( ( ( Cs != ParseInput::eol_t::ch ) && ... ) != bool( R ) ) {
          in.bump( count );
       }
       else {

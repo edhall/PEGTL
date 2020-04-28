@@ -1,7 +1,7 @@
 # Welcome to the PEGTL
 
 [![Release](https://img.shields.io/github/release/taocpp/PEGTL.svg)](https://github.com/taocpp/PEGTL/releases/latest)
-[![Download](https://api.bintray.com/packages/taocpp/public-conan/pegtl%3Ataocpp/images/download.svg)](https://bintray.com/taocpp/public-conan/pegtl%3Ataocpp/_latestVersion)
+[![Download](https://api.bintray.com/packages/conan/conan-center/taocpp-pegtl%3A_/images/download.svg)](https://bintray.com/conan/conan-center/taocpp-pegtl%3A_/_latestVersion)
 [![TravisCI](https://travis-ci.org/taocpp/PEGTL.svg?branch=master)](https://travis-ci.org/taocpp/PEGTL)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/pa5sbnw68tu650aq/branch/master?svg=true)](https://ci.appveyor.com/project/taocpp/PEGTL)
 [![Coverage](https://coveralls.io/repos/github/taocpp/PEGTL/badge.svg?branch=master)](https://coveralls.io/github/taocpp/PEGTL)
@@ -61,16 +61,18 @@ Each commit is automatically tested with multiple architectures, operating syste
 * Windows
 
   * Visual Studio 2017 (x86, x64)
+  * Visual Studio 2019 (x86, x64)
 
 * macOS (using libc++)
 
   * macOS 10.13, Xcode 9.4
-  * macOS 10.14, Xcode 10.2
+  * macOS 10.14, Xcode 10.3
+  * macOS 10.14, Xcode 11.4
 
 * Ubuntu 16.04 LTS (using libstdc++)
 
-  * GCC 7.x, 8.x
-  * Clang 5.x, 6.x, 7.x, 8.x
+  * GCC 7.x, 8.x, 9.x
+  * Clang 5.x, 6.x, 7.x, 8.x, 9.x, 10.x
 
 Additionally, each commit is checked with Clang's [Static Analyzer](https://clang-analyzer.llvm.org/), GCC's and Clang's [sanitizers](https://github.com/google/sanitizers), [`clang-tidy`](http://clang.llvm.org/extra/clang-tidy/), and [`valgrind`](http://valgrind.org/).
 Code coverage is automatically measured and the unit tests cover 100% of the core library code (for releases).
@@ -83,42 +85,48 @@ For details see the [changelog](doc/Changelog.md).
 
 In appreciation of all contributions here are the people that have [directly contributed](https://github.com/taocpp/PEGTL/graphs/contributors) to the PEGTL and/or its development.
 
-[<img alt="andoma" src="https://avatars2.githubusercontent.com/u/216384?v=4&s=117" width="117">](https://github.com/andoma)
-[<img alt="Bjoe" src="https://avatars3.githubusercontent.com/u/727911?v=4&s=117" width="117">](https://github.com/Bjoe)
-[<img alt="bwagner" src="https://avatars3.githubusercontent.com/u/447049?v=4&s=117" width="117">](https://github.com/bwagner)
-[<img alt="cdiggins" src="https://avatars2.githubusercontent.com/u/1759994?s=460&v=4?v=4&s=117" width="117">](https://github.com/cdiggins)
-[<img alt="delpinux" src="https://avatars0.githubusercontent.com/u/35096584?v=4&s=117" width="117">](https://github.com/delpinux)
-[<img alt="dkopecek" src="https://avatars2.githubusercontent.com/u/1353140?v=4&s=117" width="117">](https://github.com/dkopecek)
-[<img alt="irrequietus" src="https://avatars0.githubusercontent.com/u/231192?v=4&s=117" width="117">](https://github.com/irrequietus)
-[<img alt="jedelbo" src="https://avatars2.githubusercontent.com/u/572755?v=4&s=117" width="117">](https://github.com/jedelbo)
-[<img alt="joelfrederico" src="https://avatars0.githubusercontent.com/u/458871?v=4&s=117" width="117">](https://github.com/joelfrederico)
-[<img alt="jovermann" src="https://avatars3.githubusercontent.com/u/6087443?v=4&s=117" width="117">](https://github.com/jovermann)
-[<img alt="kneth" src="https://avatars0.githubusercontent.com/u/1225363?v=4&s=117" width="117">](https://github.com/kneth)
-[<img alt="kuzmas" src="https://avatars1.githubusercontent.com/u/1858553?v=4&s=117" width="117">](https://github.com/kuzmas)
-[<img alt="lambdafu" src="https://avatars1.githubusercontent.com/u/1138455?v=4&s=117" width="117">](https://github.com/lambdafu)
-[<img alt="lichray" src="https://avatars2.githubusercontent.com/u/433009?v=4&s=117" width="117">](https://github.com/lichray)
-[<img alt="michael-brade" src="https://avatars0.githubusercontent.com/u/8768950?v=4&s=117" width="117">](https://github.com/michael-brade)
-[<img alt="mkrupcale" src="https://avatars1.githubusercontent.com/u/13936020?v=4&s=117" width="117">](https://github.com/mkrupcale)
-[<img alt="NewProggie" src="https://avatars3.githubusercontent.com/u/162319?s=460&v=4?v=4&s=117" width="117">](https://github.com/NewProggie)
-[<img alt="pauloscustodio" src="https://avatars1.githubusercontent.com/u/70773?v=4&s=117" width="117">](https://github.com/pauloscustodio)
-[<img alt="pleroux0" src="https://avatars2.githubusercontent.com/u/39619854?v=4&s=117" width="117">](https://github.com/pleroux0)
-[<img alt="quadfault" src="https://avatars3.githubusercontent.com/u/30195320?v=4&s=117" width="117">](https://github.com/quadfault)
-[<img alt="samhocevar" src="https://avatars2.githubusercontent.com/u/245089?v=4&s=117" width="117">](https://github.com/samhocevar)
-[<img alt="sanssecours" src="https://avatars2.githubusercontent.com/u/691989?v=4&s=117" width="117">](https://github.com/sanssecours)
-[<img alt="sgbeal" src="https://avatars1.githubusercontent.com/u/235303?v=4&s=117" width="117">](https://github.com/sgbeal)
-[<img alt="studoot" src="https://avatars1.githubusercontent.com/u/799344?v=4&s=117" width="117">](https://github.com/studoot)
-[<img alt="SvenJo" src="https://avatars1.githubusercontent.com/u/1538181?s=460&v=4?v=4&s=117" width="117">](https://github.com/SvenJo)
-[<img alt="wickedmic" src="https://avatars1.githubusercontent.com/u/12001183?v=4&s=117" width="117">](https://github.com/wickedmic)
-[<img alt="wravery" src="https://avatars0.githubusercontent.com/u/6502881?v=4&s=117" width="117">](https://github.com/wravery)
-[<img alt="zhihaoy" src="https://avatars2.githubusercontent.com/u/43971430?v=4&s=117" width="117">](https://github.com/zhihaoy)
+[<img alt="andoma" src="https://avatars.githubusercontent.com/u/216384" width="117">](https://github.com/andoma)
+[<img alt="bjoe" src="https://avatars.githubusercontent.com/u/727911" width="117">](https://github.com/bjoe)
+[<img alt="bwagner" src="https://avatars.githubusercontent.com/u/447049" width="117">](https://github.com/bwagner)
+[<img alt="cdiggins" src="https://avatars.githubusercontent.com/u/1759994" width="117">](https://github.com/cdiggins)
+[<img alt="delpinux" src="https://avatars.githubusercontent.com/u/35096584" width="117">](https://github.com/delpinux)
+[<img alt="dkopecek" src="https://avatars.githubusercontent.com/u/1353140" width="117">](https://github.com/dkopecek)
+[<img alt="gene-hightower" src="https://avatars.githubusercontent.com/u/3957811" width="117">](https://github.com/gene-hightower)
+[<img alt="irrequietus" src="https://avatars.githubusercontent.com/u/231192" width="117">](https://github.com/irrequietus)
+[<img alt="jedelbo" src="https://avatars.githubusercontent.com/u/572755" width="117">](https://github.com/jedelbo)
+[<img alt="joelfrederico" src="https://avatars.githubusercontent.com/u/458871" width="117">](https://github.com/joelfrederico)
+[<img alt="johelegp" src="https://avatars.githubusercontent.com/u/21071787" width="117">](https://github.com/johelegp)
+[<img alt="jovermann" src="https://avatars.githubusercontent.com/u/6087443" width="117">](https://github.com/jovermann)
+[<img alt="kneth" src="https://avatars.githubusercontent.com/u/1225363" width="117">](https://github.com/kneth)
+[<img alt="kuzmas" src="https://avatars.githubusercontent.com/u/1858553" width="117">](https://github.com/kuzmas)
+[<img alt="lambdafu" src="https://avatars.githubusercontent.com/u/1138455" width="117">](https://github.com/lambdafu)
+[<img alt="lichray" src="https://avatars.githubusercontent.com/u/433009" width="117">](https://github.com/lichray)
+[<img alt="michael-brade" src="https://avatars.githubusercontent.com/u/8768950" width="117">](https://github.com/michael-brade)
+[<img alt="mkrupcale" src="https://avatars.githubusercontent.com/u/13936020" width="117">](https://github.com/mkrupcale)
+[<img alt="newproggie" src="https://avatars.githubusercontent.com/u/162319" width="117">](https://github.com/newproggie)
+[<img alt="obiwahn" src="https://avatars.githubusercontent.com/u/741109" width="117">](https://github.com/obiwahn)
+[<img alt="ohanar" src="https://avatars.githubusercontent.com/u/1442822" width="117">](https://github.com/ohanar)
+[<img alt="pauloscustodio" src="https://avatars.githubusercontent.com/u/70773" width="117">](https://github.com/pauloscustodio)
+[<img alt="pleroux0" src="https://avatars.githubusercontent.com/u/39619854" width="117">](https://github.com/pleroux0)
+[<img alt="quadfault" src="https://avatars.githubusercontent.com/u/30195320" width="117">](https://github.com/quadfault)
+[<img alt="robertcampion" src="https://avatars.githubusercontent.com/u/4220569" width="117">](https://github.com/robertcampion)
+[<img alt="samhocevar" src="https://avatars.githubusercontent.com/u/245089" width="117">](https://github.com/samhocevar)
+[<img alt="sanssecours" src="https://avatars.githubusercontent.com/u/691989" width="117">](https://github.com/sanssecours)
+[<img alt="sgbeal" src="https://avatars.githubusercontent.com/u/235303" width="117">](https://github.com/sgbeal)
+[<img alt="skyrich62" src="https://avatars.githubusercontent.com/u/23705081" width="117">](https://github.com/skyrich62)
+[<img alt="studoot" src="https://avatars.githubusercontent.com/u/799344" width="117">](https://github.com/studoot)
+[<img alt="svenjo" src="https://avatars.githubusercontent.com/u/1538181" width="117">](https://github.com/svenjo)
+[<img alt="wickedmic" src="https://avatars.githubusercontent.com/u/12001183" width="117">](https://github.com/wickedmic)
+[<img alt="wravery" src="https://avatars.githubusercontent.com/u/6502881" width="117">](https://github.com/wravery)
+[<img alt="zhihaoy" src="https://avatars.githubusercontent.com/u/43971430" width="117">](https://github.com/zhihaoy)
 
 ## The Art of C++
 
 The PEGTL is part of [The Art of C++](https://taocpp.github.io/).
 
-[<img alt="ColinH" src="https://avatars0.githubusercontent.com/u/113184?v=4&s=117" width="117">](https://github.com/ColinH)
-[<img alt="d-frey" src="https://avatars2.githubusercontent.com/u/3956325?v=4&s=117" width="117">](https://github.com/d-frey)
-[<img alt="uilianries" src="https://avatars0.githubusercontent.com/u/4870173?v=4&s=117" width="117">](https://github.com/uilianries)
+[<img alt="colinh" src="https://avatars.githubusercontent.com/u/113184" width="117">](https://github.com/colinh)
+[<img alt="d-frey" src="https://avatars.githubusercontent.com/u/3956325" width="117">](https://github.com/d-frey)
+[<img alt="uilianries" src="https://avatars.githubusercontent.com/u/4870173" width="117">](https://github.com/uilianries)
 
 ## Contact
 
@@ -128,7 +136,7 @@ For questions and suggestions regarding the PEGTL, success or failure stories, a
 
 The PEGTL is certified [Open Source](http://www.opensource.org/docs/definition.html) software. It may be used for any purpose, including commercial purposes, at absolutely no cost. It is distributed under the terms of the [MIT license](http://www.opensource.org/licenses/mit-license.html) reproduced here.
 
-> Copyright (c) 2007-2019 Dr. Colin Hirsch and Daniel Frey
+> Copyright (c) 2007-2020 Dr. Colin Hirsch and Daniel Frey
 >
 > Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 >

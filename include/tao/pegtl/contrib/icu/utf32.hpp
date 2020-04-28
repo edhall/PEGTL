@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_CONTRIB_ICU_UTF32_HPP
@@ -7,9 +7,9 @@
 #include "internal.hpp"
 
 #include "../../config.hpp"
-#include "../../utf32.hpp"
+#include "../utf32.hpp"
 
-#include "../../internal/peek_utf32.hpp"
+#include "../internal/peek_utf32.hpp"
 
 namespace TAO_PEGTL_NAMESPACE
 {
@@ -18,14 +18,12 @@ namespace TAO_PEGTL_NAMESPACE
       template< UProperty P, bool V = true >
       struct binary_property
          : internal::icu::binary_property< internal::peek_utf32_be, P, V >
-      {
-      };
+      {};
 
       template< UProperty P, int V >
       struct property_value
          : internal::icu::property_value< internal::peek_utf32_be, P, V >
-      {
-      };
+      {};
 
       // clang-format off
       struct alphabetic : binary_property< UCHAR_ALPHABETIC > {};
@@ -109,14 +107,12 @@ namespace TAO_PEGTL_NAMESPACE
       template< UProperty P, bool V = true >
       struct binary_property
          : internal::icu::binary_property< internal::peek_utf32_le, P, V >
-      {
-      };
+      {};
 
       template< UProperty P, int V >
       struct property_value
          : internal::icu::property_value< internal::peek_utf32_le, P, V >
-      {
-      };
+      {};
 
       // clang-format off
       struct alphabetic : binary_property< UCHAR_ALPHABETIC > {};

@@ -1,4 +1,4 @@
-// Copyright (c) 2015-2019 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2015-2020 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/PEGTL/
 
 #ifndef TAO_PEGTL_FILE_INPUT_HPP
@@ -37,7 +37,7 @@ namespace TAO_PEGTL_NAMESPACE
 #endif
 
    template< typename... Ts >
-   explicit file_input( Ts&&... )->file_input<>;
+   explicit file_input( Ts&&... ) -> file_input<>;
 
 }  // namespace TAO_PEGTL_NAMESPACE
 
